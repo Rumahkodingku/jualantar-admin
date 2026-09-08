@@ -9,6 +9,7 @@ import {
 } from "~/components/ui/sidebar"
 import { sidebarGroups } from "../navigation-config"
 import { SidebarNavItem } from "./sidebar-nav-item"
+import { SidebarNavSubmenu } from "./sidebar-nav-submenu"
 import { AppSidebarHeader } from "./sidebar-header"
 
 export function AppSidebar() {
@@ -20,15 +21,19 @@ export function AppSidebar() {
                     {sidebarGroups.map((group) => (
                         <SidebarGroup key={group.label} className="gap-0 p-0">
                             {group.label && (
-                                <SidebarGroupLabel className="px-3 text-[0.60rem] font-semibold tracking-[0.16em] text-sidebar-foreground/50 uppercase">
+                                <SidebarGroupLabel className="px-3 text-[0.60rem] font-bold tracking-[0.16em] text-sidebar-foreground/50 uppercase">
                                     {group.label}
                                 </SidebarGroupLabel>
                             )}
                             <SidebarGroupContent>
                                 <SidebarMenu className="gap-0.5">
-                                    {group.items.map((item) => (
-                                        <SidebarNavItem key={item.href} item={item} />
-                                    ))}
+                                    {group.items.map((item) =>
+                                        item.children?.length ? (
+                                            <SidebarNavSubmenu key={item.href} item={item} />
+                                        ) : (
+                                            <SidebarNavItem key={item.href} item={item} />
+                                        )
+                                    )}
                                 </SidebarMenu>
                             </SidebarGroupContent>
                         </SidebarGroup>

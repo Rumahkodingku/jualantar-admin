@@ -29,7 +29,7 @@ export function TopbarSearch() {
                 role="searchbox"
                 autoComplete="off"
                 placeholder="Cari pesanan, kurir, merchant, atau menu..."
-                className="h-10 rounded-xl ps-9 pe-16"
+                className="rounded-xl py-5.5 ps-9 pe-16"
                 aria-label="Cari pesanan, kurir, merchant, atau menu"
             />
             <span className="pointer-events-none absolute inset-e-2.5 top-1/2 flex -translate-y-1/2 items-center gap-0.5">

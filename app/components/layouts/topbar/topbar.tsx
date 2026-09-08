@@ -38,7 +38,7 @@ export function Topbar() {
 
             <div className="ms-auto flex shrink-0 items-center gap-1 md:ms-0">
                 <TopbarNotifications />
-                <Separator orientation="vertical" className="mx-1.5 hidden h-5 sm:block" />
+                <Separator orientation="vertical" className="mx-1.5 hidden h-10 sm:block" />
                 <TopbarProfile />
             </div>
         </header>
