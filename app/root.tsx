@@ -2,6 +2,7 @@ import { QueryClientProvider } from "@tanstack/react-query"
 import * as React from "react"
 import { Links, Meta, Outlet, Scripts, ScrollRestoration, isRouteErrorResponse } from "react-router"
 
+import { Toaster } from "~/components/ui/toast"
 import { createQueryClient } from "./lib/query-client"
 import type { Route } from "./+types/root"
 import "./app.css"
@@ -17,6 +18,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
             </head>
             <body>
                 {children}
+                <Toaster timeout={2000} />
                 <ScrollRestoration />
                 <Scripts />
             </body>
