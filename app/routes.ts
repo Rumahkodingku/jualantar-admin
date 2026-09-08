@@ -7,5 +7,5 @@ export default [
         route("forgot-password", "modules/auth/routes/forgot-password-route.tsx"),
         route("reset-password", "modules/auth/routes/reset-password-route.tsx"),
     ]),
-    route("dashboard", "modules/dashboard/routes/index.tsx"),
+    route("dashboard", "modules/dashboard/routes/dashboard-layout.tsx", [index("modules/dashboard/routes/index.tsx")]),
 ] satisfies RouteConfig
