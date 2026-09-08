@@ -1,11 +1,9 @@
 import { Link } from "react-router"
 import { Menu } from "lucide-react"
-
 import { Logo } from "~/components/logo"
 import { Button } from "~/components/ui/button"
 import { Separator } from "~/components/ui/separator"
 import { useSidebar } from "~/components/ui/sidebar"
-
 import { TopbarNotifications } from "./topbar-notifications"
 import { TopbarProfile } from "./topbar-profile"
 import { TopbarSearch } from "./topbar-search"
@@ -14,7 +12,7 @@ export function Topbar() {
     const { setOpenMobile } = useSidebar()
 
     return (
-        <header className="sticky top-0 z-30 flex h-16 shrink-0 items-center gap-2 border-b border-border/70 bg-background/85 px-4 backdrop-blur-md supports-[backdrop-filter]:bg-background/75 md:px-6">
+        <header className="sticky top-0 z-30 flex h-16 shrink-0 items-center gap-2 border-b border-border/70 bg-background/85 px-4 backdrop-blur-md supports-backdrop-filter:bg-background/75 md:px-6">
             <Button
                 type="button"
                 variant="ghost"

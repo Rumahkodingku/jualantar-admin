@@ -15,27 +15,25 @@ import {
 } from "lucide-react"
 
 export interface NavItem {
-    /** Label menu yang ditampilkan. */
     title: string
-    /** Target halaman (rencana) di dalam aplikasi. */
     href: string
     icon: LucideIcon
 }
 
 export interface NavGroup {
-    /** Label grup, ditampilkan uppercase di UI. */
-    label: string
+    label?: string
     items: NavItem[]
 }
 
-/**
- * Navigasi sidebar, dipisahkan dari komponen UI agar mudah diubah
- * dan siap disambungkan ke data/permission nyata nantinya.
- */
 export const sidebarGroups: NavGroup[] = [
     {
-        label: "Dashboard",
-        items: [{ title: "Dashboard", href: "/dashboard", icon: LayoutDashboard }],
+        items: [
+            {
+                title: "Dashboard",
+                href: "/dashboard",
+                icon: LayoutDashboard,
+            },
+        ],
     },
     {
         label: "Operasional",

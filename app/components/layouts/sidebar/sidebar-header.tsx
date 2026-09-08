@@ -1,30 +1,15 @@
-import { Link } from "react-router"
 import { PanelLeftClose, PanelLeftOpen } from "lucide-react"
-import { cn } from "cn"
-
+import { Link } from "react-router"
 import { Logo } from "~/components/logo"
 import { Button } from "~/components/ui/button"
-import { Text } from "~/components/ui/text"
-import {
-    Sidebar,
-    SidebarContent,
-    SidebarGroup,
-    SidebarGroupContent,
-    SidebarGroupLabel,
-    SidebarHeader,
-    SidebarMenu,
-    useSidebar,
-} from "~/components/ui/sidebar"
+import { SidebarHeader, useSidebar } from "~/components/ui/sidebar"
 
-import { sidebarGroups } from "./navigation-config"
-import { SidebarNavItem } from "./sidebar-nav-item"
-
-function AppSidebarHeader() {
+export function AppSidebarHeader() {
     const { state, toggleSidebar } = useSidebar()
     const collapsed = state === "collapsed"
 
     return (
-        <SidebarHeader className="border-b border-sidebar-border/70 p-2">
+        <SidebarHeader className="border-b border-sidebar-border/70 bg-background p-2">
             {collapsed ? (
                 <div className="flex flex-col items-center gap-2.5 pt-2">
                     <Link
@@ -75,31 +60,5 @@ function AppSidebarHeader() {
                 </div>
             )}
         </SidebarHeader>
-    )
-}
-
-export function AppSidebar() {
-    return (
-        <Sidebar collapsible="icon">
-            <AppSidebarHeader />
-            <SidebarContent>
-                <nav aria-label="Menu utama" className={cn("flex flex-col gap-3 px-1.5 py-3")}>
-                    {sidebarGroups.map((group) => (
-                        <SidebarGroup key={group.label} className="gap-0 p-0">
-                            <SidebarGroupLabel className="px-3 pb-1 text-[0.68rem] font-semibold tracking-[0.12em] text-sidebar-foreground/45 uppercase">
-                                {group.label}
-                            </SidebarGroupLabel>
-                            <SidebarGroupContent>
-                                <SidebarMenu className="gap-0.5">
-                                    {group.items.map((item) => (
-                                        <SidebarNavItem key={item.href} item={item} />
-                                    ))}
-                                </SidebarMenu>
-                            </SidebarGroupContent>
-                        </SidebarGroup>
-                    ))}
-                </nav>
-            </SidebarContent>
-        </Sidebar>
     )
 }

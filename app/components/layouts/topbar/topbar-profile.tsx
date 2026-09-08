@@ -1,6 +1,5 @@
 import { Link } from "react-router"
 import { ChevronDown, LogOut, Settings, UserRound } from "lucide-react"
-
 import { Avatar, AvatarFallback } from "~/components/ui/avatar"
 import { Text } from "~/components/ui/text"
 import {
@@ -44,28 +43,33 @@ export function TopbarProfile() {
                     </button>
                 }
             />
-            <DropdownMenuContent align="end" sideOffset={10} className="w-60">
-                <DropdownMenuLabel>
-                    <Text variant="sm" className="block truncate font-medium text-foreground">
-                        {ADMIN_NAME}
-                    </Text>
-                    <Text variant="xs" className="block truncate font-normal text-muted-foreground">
-                        {ADMIN_EMAIL}
-                    </Text>
-                </DropdownMenuLabel>
-                <DropdownMenuSeparator />
+
+            <DropdownMenuContent sideOffset={10} className="mt-2 w-72 p-2">
                 <DropdownMenuGroup>
-                    <DropdownMenuItem render={<Link to="/settings" />}>
+                    <DropdownMenuLabel>
+                        <Text variant="sm" className="block truncate font-medium text-foreground">
+                            {ADMIN_NAME}
+                        </Text>
+
+                        <Text variant="xs" className="block truncate font-normal text-muted-foreground">
+                            {ADMIN_EMAIL}
+                        </Text>
+                    </DropdownMenuLabel>
+
+                    <DropdownMenuItem render={<Link to="/settings" />} className="mt-1 cursor-pointer py-1.5">
                         <UserRound aria-hidden="true" />
                         Profil
                     </DropdownMenuItem>
-                    <DropdownMenuItem render={<Link to="/settings" />}>
+
+                    <DropdownMenuItem render={<Link to="/settings" />} className="mt-1 cursor-pointer py-1.5">
                         <Settings aria-hidden="true" />
                         Pengaturan
                     </DropdownMenuItem>
                 </DropdownMenuGroup>
+
                 <DropdownMenuSeparator />
-                <DropdownMenuItem variant="destructive" render={<Link to="/login" />}>
+
+                <DropdownMenuItem variant="destructive" render={<Link to="/login" />} className="cursor-pointer py-1.5">
                     <LogOut aria-hidden="true" />
                     Keluar
                 </DropdownMenuItem>

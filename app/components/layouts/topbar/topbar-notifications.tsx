@@ -1,6 +1,5 @@
 import type { LucideIcon } from "lucide-react"
 import { Bell, Bike, CheckCircle2, CircleDollarSign, ShoppingCart, Store } from "lucide-react"
-
 import { Button } from "~/components/ui/button"
 import {
     DropdownMenu,
@@ -21,10 +20,6 @@ interface TopbarNotification {
     unread?: boolean
 }
 
-/**
- * Contoh data notifikasi untuk topbar. Gunakan sebagai titik
- * sambung ke API/service notifikasi ketika sudah tersedia.
- */
 const mockNotifications: TopbarNotification[] = [
     {
         id: "n1",
@@ -90,19 +85,19 @@ export function TopbarNotifications() {
                     />
                 )}
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" sideOffset={10} className="w-[calc(100vw-2rem)] max-w-sm p-0">
-                <div className="flex items-center justify-between px-3 pt-3 pb-1">
-                    <DropdownMenuLabel className="px-0 font-heading text-sm font-semibold text-foreground">
-                        Notifikasi
-                    </DropdownMenuLabel>
-                    {unreadCount > 0 && (
-                        <span className="rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">
-                            {unreadCount} baru
-                        </span>
-                    )}
-                </div>
-                <DropdownMenuSeparator />
+            <DropdownMenuContent sideOffset={10} className="mt-3 w-[calc(100vw-2rem)] max-w-sm p-0">
                 <DropdownMenuGroup className="p-1.5">
+                    <div className="flex items-center justify-between px-3 pt-3 pb-1">
+                        <DropdownMenuLabel className="px-0 font-heading text-sm font-semibold text-foreground">
+                            Notifikasi
+                        </DropdownMenuLabel>
+                        {unreadCount > 0 && (
+                            <span className="rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">
+                                {unreadCount} baru
+                            </span>
+                        )}
+                    </div>
+                    <DropdownMenuSeparator />
                     {mockNotifications.map((notification) => {
                         const Icon = notification.icon
                         return (

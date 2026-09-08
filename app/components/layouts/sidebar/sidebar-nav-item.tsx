@@ -1,8 +1,7 @@
 import { useLocation } from "react-router"
 import { useSidebar } from "~/components/ui/sidebar"
 import { Text } from "~/components/ui/text"
-
-import { isNavItemActive, type NavItem } from "./navigation-config"
+import { isNavItemActive, type NavItem } from "../navigation-config"
 import { SidebarMenuButton, SidebarMenuItem } from "~/components/ui/sidebar"
 import { Link } from "react-router"
 
@@ -21,10 +20,10 @@ export function SidebarNavItem({ item }: { item: NavItem }) {
                 onClick={() => {
                     if (isMobile) setOpenMobile(false)
                 }}
-                className="h-10 rounded-lg px-3 text-[0.92rem] md:h-8 md:px-2.5 md:text-sm"
+                className="rounded-lg p-4.5 text-[0.92rem] md:text-sm"
             >
                 <Icon aria-hidden="true" />
-                <Text variant="sm" className="truncate">
+                <Text variant="xs" className="truncate" weight="medium">
                     {item.title}
                 </Text>
             </SidebarMenuButton>

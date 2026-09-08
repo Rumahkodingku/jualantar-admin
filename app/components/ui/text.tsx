@@ -20,6 +20,16 @@ const textVariants = cva("", {
             "8xl": "text-8xl",
             "9xl": "text-9xl",
         },
+        weight: {
+            thin: "font-thin",
+            light: "font-light",
+            normal: "font-normal",
+            medium: "font-medium",
+            semibold: "font-semibold",
+            bold: "font-bold",
+            extrabold: "font-extrabold",
+            black: "font-black",
+        },
         align: {
             left: "text-left",
             center: "text-center",
@@ -77,14 +87,29 @@ type TextProps = useRender.ComponentProps<"p"> &
         as?: keyof React.JSX.IntrinsicElements
     }
 
-function Text({ className, variant, align, transform, nowrap, truncate, lineClamp, as, render, ...props }: TextProps) {
+function Text({
+    className,
+    variant,
+    weight,
+    align,
+    transform,
+    nowrap,
+    truncate,
+    lineClamp,
+    as,
+    render,
+    ...props
+}: TextProps) {
     const defaultTagName = (as ?? textDefaultTag[variant ?? "base"]) as keyof React.JSX.IntrinsicElements
 
     return useRender({
         defaultTagName,
         props: mergeProps<"p">(
             {
-                className: cn(textVariants({ variant, align, transform, nowrap, truncate, lineClamp }), className),
+                className: cn(
+                    textVariants({ variant, weight, align, transform, nowrap, truncate, lineClamp }),
+                    className
+                ),
             },
             props
         ),

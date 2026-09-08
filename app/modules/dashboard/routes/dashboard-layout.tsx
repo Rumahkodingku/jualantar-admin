@@ -1,11 +1,10 @@
 import { Outlet } from "react-router"
-
-import { DashboardLayout } from "~/components/layouts/dashboard-layout"
+import { Layout } from "~/components/layouts/layout"
 
 export default function DashboardLayoutRoute() {
     return (
-        <DashboardLayout>
+        <Layout>
             <Outlet />
-        </DashboardLayout>
+        </Layout>
     )
 }

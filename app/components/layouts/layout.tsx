@@ -1,15 +1,14 @@
 import type { CSSProperties, ReactNode } from "react"
-
 import { SidebarInset, SidebarProvider } from "~/components/ui/sidebar"
 import { TooltipProvider } from "~/components/ui/tooltip"
-import { AppSidebar } from "./app-sidebar"
+import { AppSidebar } from "./sidebar/sidebar"
 import { Topbar } from "./topbar/topbar"
 
-const SIDEBAR_WIDTH = "17.5rem"
+const SIDEBAR_WIDTH = "17rem"
 
-export function DashboardLayout({ children }: { children: ReactNode }) {
+export function Layout({ children }: { children: ReactNode }) {
     return (
-        <TooltipProvider delay={300}>
+        <TooltipProvider>
             <SidebarProvider
                 style={
                     {
