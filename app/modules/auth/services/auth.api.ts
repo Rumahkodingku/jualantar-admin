@@ -2,7 +2,7 @@ import { api } from "~/lib/api"
 
 import type { ForgotPasswordInput, LoginInput, ResetPasswordInput } from "../schemas/auth.schemas"
 import { authMockService } from "./auth.mock"
-import type { AuthService, LoginResponse } from "./auth.types"
+import type { AuthService, LoginResponse } from "../types/auth.types"
 
 export const authRealService: AuthService = {
     async login(input: LoginInput): Promise<LoginResponse> {

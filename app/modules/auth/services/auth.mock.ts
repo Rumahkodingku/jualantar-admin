@@ -1,7 +1,7 @@
 import { ApiError } from "~/lib/api"
 
 import type { ForgotPasswordInput, LoginInput, ResetPasswordInput } from "../schemas/auth.schemas"
-import type { AuthService, LoginResponse } from "./auth.types"
+import type { AuthService, LoginResponse } from "../types/auth.types"
 
 const MOCK_DELAY_MS = 800
 const MOCK_ADMIN_EMAIL = "admin@jualantar.id"
