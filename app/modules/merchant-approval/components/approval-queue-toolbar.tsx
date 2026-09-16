@@ -87,7 +87,7 @@ export function ApprovalQueueToolbar({
 
             <div className="flex flex-wrap items-center gap-2">
                 <Select items={STATUS_ITEMS} value={status} onValueChange={(value) => onStatusChange(String(value))}>
-                    <SelectTrigger size="sm" className="w-[170px]" aria-label="Filter status">
+                    <SelectTrigger size="sm" className="w-42.5" aria-label="Filter status">
                         <SelectValue />
                     </SelectTrigger>
                     <SelectContent>

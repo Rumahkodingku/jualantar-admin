@@ -10,6 +10,7 @@ import { formatDateTime } from "~/lib/format"
 import { MERCHANT_TYPE_LABELS } from "../services/merchant-approval.mappers"
 import type { ApprovalListItem } from "../types/merchant-approval.types"
 import { ApplicationStatusBadge } from "./approval-status-badge"
+import { Text } from "~/components/ui/text"
 
 const features = tableFeatures({})
 const columnHelper = createColumnHelper<typeof features, ApprovalListItem>()
@@ -118,35 +119,46 @@ export function ApprovalTable({ data, currentUserId, canClaim, onClaim, claiming
     const table = useTable({ features, columns, data })
 
     return (
-        <Table>
-            <TableHeader>
-                {table.getHeaderGroups().map((headerGroup) => (
-                    <TableRow key={headerGroup.id} className="hover:bg-transparent">
-                        {headerGroup.headers.map((header) => (
-                            <TableHead
-                                key={header.id}
-                                className={header.column.id === "actions" ? "text-right" : undefined}
-                            >
-                                {header.isPlaceholder ? null : <table.FlexRender header={header} />}
-                            </TableHead>
-                        ))}
-                    </TableRow>
-                ))}
-            </TableHeader>
-            <TableBody>
-                {table.getRowModel().rows.map((row) => (
-                    <TableRow key={row.id}>
-                        {row.getAllCells().map((cell) => (
-                            <TableCell
-                                key={cell.id}
-                                className={cell.column.id === "actions" ? "text-right" : undefined}
-                            >
-                                <table.FlexRender cell={cell} />
-                            </TableCell>
-                        ))}
-                    </TableRow>
-                ))}
-            </TableBody>
-        </Table>
+        <div>
+            <Table>
+                <TableHeader>
+                    {table.getHeaderGroups().map((headerGroup) => (
+                        <TableRow key={headerGroup.id} className="hover:bg-transparent">
+                            {headerGroup.headers.map((header) => (
+                                <TableHead
+                                    key={header.id}
+                                    className={header.column.id === "actions" ? "text-right" : undefined}
+                                >
+                                    <Text
+                                        variant="xs"
+                                        weight="bold"
+                                        transform="uppercase"
+                                        className="text-muted-foreground"
+                                    >
+                                        {header.isPlaceholder ? null : <table.FlexRender header={header} />}
+                                    </Text>
+                                </TableHead>
+                            ))}
+                        </TableRow>
+                    ))}
+                </TableHeader>
+                <TableBody>
+                    {table.getRowModel().rows.map((row) => (
+                        <TableRow key={row.id}>
+                            {row.getAllCells().map((cell) => (
+                                <TableCell
+                                    key={cell.id}
+                                    className={cell.column.id === "actions" ? "text-right" : undefined}
+                                >
+                                    <Text variant="xs" weight="medium" className="text-foreground">
+                                        <table.FlexRender cell={cell} />
+                                    </Text>
+                                </TableCell>
+                            ))}
+                        </TableRow>
+                    ))}
+                </TableBody>
+            </Table>
+        </div>
     )
 }
