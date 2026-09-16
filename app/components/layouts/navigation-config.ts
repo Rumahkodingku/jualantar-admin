@@ -83,6 +83,18 @@ export const sidebarGroups: NavGroup[] = [
                 title: "Merchant",
                 href: "/merchants",
                 icon: Store,
+                children: [
+                    {
+                        // Mengelola data merchant yang sudah diverifikasi dan aktif beroperasi di platform.
+                        title: "Aktif Beroperasi",
+                        href: "/merchants/active",
+                    },
+                    {
+                        // Mengelola data merchant yang sedang dalam proses verifikasi dan belum aktif beroperasi di platform.
+                        title: "Pending Verifikasi",
+                        href: "/merchants/pending",
+                    },
+                ],
             },
             {
                 // Mengelola program promosi platform seperti voucher,
