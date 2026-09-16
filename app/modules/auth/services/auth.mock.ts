@@ -1,14 +1,31 @@
 import { ApiError } from "~/lib/api"
 
 import type { ForgotPasswordInput, LoginInput, ResetPasswordInput } from "../schemas/auth.schemas"
-import type { AuthService, LoginResponse } from "../types/auth.types"
+import type { AuthService, AuthUser, LoginResponse } from "../types/auth.types"
 
 const MOCK_DELAY_MS = 800
 const MOCK_ADMIN_EMAIL = "admin@jualantar.id"
 const MOCK_ADMIN_PASSWORD = "password"
 
+const MOCK_PERMISSIONS = [
+    "merchant.approval.view",
+    "merchant.approval.claim",
+    "merchant.approval.review",
+    "merchant.approval.revision",
+    "merchant.approval.reject",
+    "merchant.approval.approve",
+]
+
 function simulateDelay(): Promise<void> {
     return new Promise((resolve) => setTimeout(resolve, MOCK_DELAY_MS))
+}
+
+const mockAdmin: AuthUser = {
+    id: "1",
+    name: "Admin JualAntar",
+    email: MOCK_ADMIN_EMAIL,
+    roles: ["super-admin"],
+    permissions: MOCK_PERMISSIONS,
 }
 
 export const authMockService: AuthService = {
@@ -22,13 +39,12 @@ export const authMockService: AuthService = {
         return {
             token: "mock-token",
             token_type: "Bearer",
-            user: {
-                id: "1",
-                name: "Admin JualAntar",
-                email,
-                roles: ["super-admin"],
-            },
+            user: { ...mockAdmin, email },
         }
+    },
+    async me(): Promise<AuthUser> {
+        await simulateDelay()
+        return mockAdmin
     },
     async forgotPassword(_input: ForgotPasswordInput): Promise<void> {
         await simulateDelay()

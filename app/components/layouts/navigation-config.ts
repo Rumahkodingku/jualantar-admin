@@ -90,9 +90,10 @@ export const sidebarGroups: NavGroup[] = [
                         href: "/merchants/active",
                     },
                     {
-                        // Mengelola data merchant yang sedang dalam proses verifikasi dan belum aktif beroperasi di platform.
+                        // Mengelola data merchant yang sedang dalam proses verifikasi
+                        // dan belum aktif beroperasi di platform.
                         title: "Pending Verifikasi",
-                        href: "/merchants/pending",
+                        href: "/merchant-approvals/queue",
                     },
                 ],
             },

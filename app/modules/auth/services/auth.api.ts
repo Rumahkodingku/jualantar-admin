@@ -3,10 +3,29 @@ import { setAuthToken } from "~/lib/auth"
 
 import type { ForgotPasswordInput, LoginInput, ResetPasswordInput } from "../schemas/auth.schemas"
 import { authMockService } from "./auth.mock"
-import type { AuthService, LoginResponse } from "../types/auth.types"
+import type { AuthService, AuthUser, LoginResponse } from "../types/auth.types"
 
 interface LoginEnvelope {
     data: LoginResponse
+}
+
+interface MeEnvelope {
+    data: {
+        id: string
+        email: string
+        roles?: string[]
+        permissions?: string[]
+    }
+}
+
+function toAuthUser(user: MeEnvelope["data"]): AuthUser {
+    return {
+        id: String(user.id),
+        name: user.email.split("@")[0],
+        email: user.email,
+        roles: user.roles ?? [],
+        permissions: user.permissions ?? [],
+    }
 }
 
 export const authRealService: AuthService = {
@@ -22,8 +41,14 @@ export const authRealService: AuthService = {
                 name: user.name || user.email.split("@")[0],
                 email: user.email,
                 roles: user.roles ?? [],
+                permissions: user.permissions ?? [],
             },
         }
+    },
+
+    async me(): Promise<AuthUser> {
+        const { data } = await api.get<MeEnvelope>("/auth/me")
+        return toAuthUser(data.data)
     },
 
     async forgotPassword(): Promise<void> {

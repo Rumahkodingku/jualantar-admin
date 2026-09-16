@@ -8,4 +8,9 @@ export default [
         route("reset-password", "modules/auth/routes/reset-password-route.tsx"),
     ]),
     route("dashboard", "modules/dashboard/routes/dashboard-layout.tsx", [index("modules/dashboard/routes/index.tsx")]),
+    route("merchant-approvals", "modules/merchant-approval/routes/merchant-approval-layout.tsx", [
+        index("modules/merchant-approval/routes/index.tsx"),
+        route("queue", "modules/merchant-approval/routes/merchant-approval-queue-route.tsx"),
+        route(":approvalId", "modules/merchant-approval/routes/merchant-approval-detail-route.tsx"),
+    ]),
 ] satisfies RouteConfig

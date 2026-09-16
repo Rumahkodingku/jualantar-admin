@@ -1,0 +1,227 @@
+import type { ReactNode } from "react"
+import { cn } from "~/lib/utils"
+
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/components/ui/card"
+import { Text } from "~/components/ui/text"
+import { formatDate } from "~/lib/format"
+import {
+    geographyLabel,
+    IDENTITY_TYPE_LABELS,
+    LEGAL_ENTITY_TYPE_LABELS,
+    MERCHANT_TYPE_LABELS,
+    SERVICE_AREA_TYPE_LABELS,
+} from "../services/merchant-approval.mappers"
+import type { ApplicationSnapshotData } from "../types/merchant-approval.types"
+import { DocumentPreview } from "./document-preview"
+
+function DetailSection({ title, description, children }: { title: string; description?: string; children: ReactNode }) {
+    return (
+        <Card className="min-w-0 overflow-hidden">
+            <CardHeader>
+                <CardTitle>{title}</CardTitle>
+                {description && <CardDescription>{description}</CardDescription>}
+            </CardHeader>
+            <CardContent>{children}</CardContent>
+        </Card>
+    )
+}
+
+function FieldGrid({ children }: { children: ReactNode }) {
+    return <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">{children}</div>
+}
+
+function DetailItem({ label, value, mono }: { label: string; value: ReactNode; mono?: boolean }) {
+    return (
+        <div className="min-w-0">
+            <Text variant="xs" className="text-muted-foreground">
+                {label}
+            </Text>
+            <div className={cn("mt-0.5 text-sm break-words text-foreground", mono && "font-mono text-xs")}>
+                {value === null || value === undefined || value === "" ? "-" : value}
+            </div>
+        </div>
+    )
+}
+
+function EmptyText({ children }: { children: ReactNode }) {
+    return (
+        <Text variant="sm" className="text-muted-foreground">
+            {children}
+        </Text>
+    )
+}
+
+export function SnapshotSections({ snapshot }: { snapshot: ApplicationSnapshotData }) {
+    const subjects = snapshot.subjects
+    const business = subjects.merchant?.data
+    const identity = subjects.merchant_identity?.data
+    const legalEntity = subjects.legal_entity?.data
+    const service = subjects.service?.data
+
+    return (
+        <div className="flex flex-col gap-4">
+            <DetailSection title="Bisnis">
+                {business ? (
+                    <FieldGrid>
+                        <DetailItem label="Nama Bisnis" value={business.business_name} />
+                        <DetailItem label="Slug" value={business.slug} mono />
+                        <DetailItem
+                            label="Tipe Merchant"
+                            value={business.type ? MERCHANT_TYPE_LABELS[business.type] : null}
+                        />
+                        <div className="sm:col-span-2 lg:col-span-3">
+                            <DetailItem label="Deskripsi" value={business.description} />
+                        </div>
+                    </FieldGrid>
+                ) : (
+                    <EmptyText>Data bisnis tidak tersedia.</EmptyText>
+                )}
+            </DetailSection>
+
+            <DetailSection title="Identitas Pemilik">
+                {identity ? (
+                    <FieldGrid>
+                        <DetailItem label="Nama Lengkap" value={identity.full_name} />
+                        <DetailItem
+                            label="Jenis Identitas"
+                            value={IDENTITY_TYPE_LABELS[identity.id_type] ?? identity.id_type}
+                        />
+                        <DetailItem label="Nomor Identitas" value={identity.id_number} mono />
+                        <DetailItem label="Tanggal Lahir" value={formatDate(identity.birth_date)} />
+                    </FieldGrid>
+                ) : (
+                    <EmptyText>Data identitas tidak tersedia.</EmptyText>
+                )}
+            </DetailSection>
+
+            <DetailSection title="Badan Hukum">
+                {legalEntity ? (
+                    <FieldGrid>
+                        <DetailItem label="Nama Badan Hukum" value={legalEntity.name} />
+                        <DetailItem
+                            label="Jenis Badan Hukum"
+                            value={LEGAL_ENTITY_TYPE_LABELS[legalEntity.entity_type] ?? legalEntity.entity_type}
+                        />
+                        <DetailItem label="NIB" value={legalEntity.nib} mono />
+                        <DetailItem label="NPWP" value={legalEntity.npwp} mono />
+                        <div className="sm:col-span-2">
+                            <DetailItem label="Alamat" value={legalEntity.address} />
+                        </div>
+                        <DetailItem label="Wilayah" value={geographyLabel(legalEntity)} />
+                        <DetailItem label="Kode Pos" value={legalEntity.postal_code} />
+                    </FieldGrid>
+                ) : (
+                    <EmptyText>Tidak ada badan hukum (merchant perorangan).</EmptyText>
+                )}
+            </DetailSection>
+
+            <DetailSection title="Layanan">
+                {service ? (
+                    <FieldGrid>
+                        <DetailItem label="Nama Layanan" value={service.name} />
+                        <DetailItem label="Slug" value={service.slug} mono />
+                    </FieldGrid>
+                ) : (
+                    <EmptyText>Data layanan tidak tersedia.</EmptyText>
+                )}
+            </DetailSection>
+
+            <DetailSection title="Kategori" description={`${subjects.merchant_category.length} kategori terdaftar`}>
+                {subjects.merchant_category.length > 0 ? (
+                    <ul className="flex flex-col gap-2">
+                        {subjects.merchant_category.map((category, index) => (
+                            <li
+                                key={category.subject_id}
+                                className="flex items-center justify-between gap-3 rounded-lg bg-muted/40 px-3 py-2"
+                            >
+                                <Text variant="sm" className="truncate text-foreground">
+                                    {category.data.name ?? category.data.slug ?? `Kategori ${index + 1}`}
+                                </Text>
+                                <Text variant="xs" className="shrink-0 text-muted-foreground">
+                                    {category.data.slug ? `#${category.data.slug}` : `Kategori ${index + 1}`}
+                                </Text>
+                            </li>
+                        ))}
+                    </ul>
+                ) : (
+                    <EmptyText>Belum ada kategori.</EmptyText>
+                )}
+            </DetailSection>
+
+            <DetailSection title="Outlet" description={`${subjects.merchant_outlet.length} outlet aktif`}>
+                {subjects.merchant_outlet.length > 0 ? (
+                    <div className="flex flex-col gap-3">
+                        {subjects.merchant_outlet.map((outlet) => (
+                            <div key={outlet.subject_id} className="rounded-lg border border-border p-3">
+                                <div className="flex flex-wrap items-center justify-between gap-2">
+                                    <Text variant="sm" weight="medium" className="text-foreground">
+                                        {outlet.data.name}
+                                    </Text>
+                                    <Text variant="xs" className="text-muted-foreground">
+                                        {outlet.data.status === "active" ? "Aktif" : "Nonaktif"}
+                                    </Text>
+                                </div>
+                                <div className="mt-3">
+                                    <FieldGrid>
+                                        <DetailItem label="Telepon" value={outlet.data.phone} />
+                                        <DetailItem label="Email" value={outlet.data.email} />
+                                        <DetailItem
+                                            label="Tipe Area Layanan"
+                                            value={
+                                                SERVICE_AREA_TYPE_LABELS[outlet.data.service_area_type] ??
+                                                outlet.data.service_area_type
+                                            }
+                                        />
+                                        <DetailItem label="Radius (km)" value={outlet.data.service_radius_km} />
+                                        <DetailItem label="Kode Pos" value={outlet.data.postal_code} />
+                                        <DetailItem label="Wilayah" value={geographyLabel(outlet.data)} />
+                                        <DetailItem label="Jumlah Foto" value={outlet.data.photos.length} />
+                                        <div className="sm:col-span-2 lg:col-span-3">
+                                            <DetailItem label="Alamat" value={outlet.data.address} />
+                                        </div>
+                                    </FieldGrid>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                ) : (
+                    <EmptyText>Belum ada outlet.</EmptyText>
+                )}
+            </DetailSection>
+
+            <DetailSection title="Dokumen" description={`${subjects.merchant_document.length} dokumen diunggah`}>
+                {subjects.merchant_document.length > 0 ? (
+                    <div className="flex flex-col gap-2">
+                        {subjects.merchant_document.map((document) => (
+                            <DocumentPreview key={document.subject_id} document={document.data} />
+                        ))}
+                    </div>
+                ) : (
+                    <EmptyText>Belum ada dokumen.</EmptyText>
+                )}
+            </DetailSection>
+
+            <DetailSection title="Pencairan Dana" description={`${subjects.payout_account.length} rekening terdaftar`}>
+                {subjects.payout_account.length > 0 ? (
+                    <div className="flex flex-col gap-3">
+                        {subjects.payout_account.map((account) => (
+                            <div key={account.subject_id} className="rounded-lg border border-border p-3">
+                                <FieldGrid>
+                                    <DetailItem label="Bank" value={account.data.bank_name} />
+                                    <DetailItem label="Nomor Rekening" value={account.data.account_number} mono />
+                                    <DetailItem label="Nama Pemilik" value={account.data.account_name} />
+                                    <DetailItem
+                                        label="Rekening Utama"
+                                        value={account.data.is_primary ? "Ya" : "Tidak"}
+                                    />
+                                </FieldGrid>
+                            </div>
+                        ))}
+                    </div>
+                ) : (
+                    <EmptyText>Belum ada rekening pencairan.</EmptyText>
+                )}
+            </DetailSection>
+        </div>
+    )
+}

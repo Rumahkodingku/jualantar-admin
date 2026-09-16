@@ -5,6 +5,7 @@ export interface AuthUser {
     name: string
     email: string
     roles: string[]
+    permissions: string[]
 }
 
 export interface LoginResponse {
@@ -15,6 +16,7 @@ export interface LoginResponse {
 
 export interface AuthService {
     login(input: LoginInput): Promise<LoginResponse>
+    me(): Promise<AuthUser>
     forgotPassword(input: ForgotPasswordInput): Promise<void>
     resetPassword(input: ResetPasswordInput): Promise<void>
 }

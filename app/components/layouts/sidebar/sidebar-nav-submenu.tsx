@@ -10,7 +10,7 @@ import {
     useSidebar,
 } from "~/components/ui/sidebar"
 import { Text } from "~/components/ui/text"
-import { isNavChildItemActive, isNavItemActive, type NavItem } from "../navigation-config"
+import { isNavChildItemActive, type NavItem } from "../navigation-config"
 
 export function SidebarNavSubmenu({ item }: { item: NavItem }) {
     const { pathname } = useLocation()
@@ -39,17 +39,22 @@ export function SidebarNavSubmenu({ item }: { item: NavItem }) {
                     <Text variant="xs" className="truncate" weight="medium">
                         {item.title}
                     </Text>
-                    <ChevronRight aria-hidden="true" className="ml-auto transition-transform group-data-open/collapsible:rotate-90" />
+                    <ChevronRight
+                        aria-hidden="true"
+                        className="ml-auto transition-transform group-data-open/collapsible:rotate-90"
+                    />
                 </CollapsibleTrigger>
                 <CollapsibleContent className="group-data-[collapsible=icon]:hidden">
                     <SidebarMenuSub>
                         {children.map((child) => {
-                            const childActive = isNavItemActive(pathname, child.href)
+                            const childActive = pathname === child.href
 
                             return (
                                 <SidebarMenuSubItem key={child.href}>
                                     <SidebarMenuSubButton
-                                        render={<Link to={child.href} aria-current={childActive ? "page" : undefined} />}
+                                        render={
+                                            <Link to={child.href} aria-current={childActive ? "page" : undefined} />
+                                        }
                                         isActive={childActive}
                                         onClick={closeMobile}
                                     >
