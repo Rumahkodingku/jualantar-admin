@@ -1,5 +1,6 @@
 import axios, { type AxiosInstance } from "axios"
 
+import { getAuthToken } from "./auth"
 import { API_BASE_URL } from "./config"
 
 export class ApiError extends Error {
@@ -35,6 +36,14 @@ export function normalizeApiError(error: unknown): ApiError {
 export const api: AxiosInstance = axios.create({
     baseURL: API_BASE_URL,
     timeout: 10_000,
+})
+
+api.interceptors.request.use((config) => {
+    const token = getAuthToken()
+    if (token) {
+        config.headers.Authorization = `Bearer ${token}`
+    }
+    return config
 })
 
 api.interceptors.response.use(

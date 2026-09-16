@@ -21,10 +21,12 @@ export const authMockService: AuthService = {
 
         return {
             token: "mock-token",
+            token_type: "Bearer",
             user: {
                 id: "1",
                 name: "Admin JualAntar",
                 email,
+                roles: ["super-admin"],
             },
         }
     },
