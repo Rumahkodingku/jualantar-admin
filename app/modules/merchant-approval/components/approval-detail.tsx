@@ -311,7 +311,7 @@ export function ApprovalDetailView({ approval }: { approval: ApprovalDetail }) {
             </Card>
 
             <Tabs defaultValue="data">
-                <TabsList>
+                <TabsList variant="line" className="mb-4">
                     <TabsTrigger value="data">Data Merchant</TabsTrigger>
                     <TabsTrigger value="review">Review Komponen</TabsTrigger>
                     <TabsTrigger value="revisions">Riwayat Revisi</TabsTrigger>

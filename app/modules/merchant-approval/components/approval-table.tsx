@@ -28,6 +28,11 @@ export function ApprovalTable({ data, currentUserId, canClaim, onClaim, claiming
         () =>
             columnHelper.columns([
                 columnHelper.display({
+                    id: "no",
+                    header: "No",
+                    cell: ({ row }) => row.index + 1,
+                }),
+                columnHelper.display({
                     id: "application_number",
                     header: "No. Pengajuan",
                     cell: ({ row }) => (
@@ -89,7 +94,7 @@ export function ApprovalTable({ data, currentUserId, canClaim, onClaim, claiming
                             {canClaim(row.original) && (
                                 <Button
                                     size="sm"
-                                    variant="outline"
+                                    variant="secondary"
                                     disabled={claimingId === row.original.id}
                                     onClick={() => onClaim(row.original.id)}
                                 >
@@ -103,11 +108,12 @@ export function ApprovalTable({ data, currentUserId, canClaim, onClaim, claiming
                             )}
                             <Button
                                 size="sm"
-                                variant="ghost"
+                                variant="secondary"
                                 nativeButton={false}
                                 render={<Link to={`/merchant-approvals/${row.original.id}`} />}
+                                className="text-xs font-semibold"
                             >
-                                Detail
+                                Lihat Detail
                             </Button>
                         </div>
                     ),

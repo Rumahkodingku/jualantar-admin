@@ -8,15 +8,6 @@ import { Spinner } from "~/components/ui/spinner"
 
 const SEARCH_DEBOUNCE_MS = 400
 
-const STATUS_ITEMS: Record<string, string> = {
-    all: "Semua Status",
-    pending: "Menunggu Review",
-    in_review: "Sedang Direview",
-    revision_required: "Perlu Revisi",
-    approved: "Disetujui",
-    rejected: "Ditolak",
-}
-
 const ASSIGNED_ITEMS: Record<string, string> = {
     all: "Semua Reviewer",
     me: "Ditugaskan ke Saya",
@@ -32,11 +23,9 @@ const SORT_ITEMS: Record<string, string> = {
 
 interface ApprovalQueueToolbarProps {
     search: string
-    status: string
     assignedTo: string
     sortValue: string
     onSearchChange: (value: string) => void
-    onStatusChange: (value: string) => void
     onAssignedChange: (value: string) => void
     onSortChange: (value: string) => void
     onRefresh: () => void
@@ -45,11 +34,9 @@ interface ApprovalQueueToolbarProps {
 
 export function ApprovalQueueToolbar({
     search,
-    status,
     assignedTo,
     sortValue,
     onSearchChange,
-    onStatusChange,
     onAssignedChange,
     onSortChange,
     onRefresh,
@@ -86,19 +73,6 @@ export function ApprovalQueueToolbar({
             </div>
 
             <div className="flex flex-wrap items-center gap-2">
-                <Select items={STATUS_ITEMS} value={status} onValueChange={(value) => onStatusChange(String(value))}>
-                    <SelectTrigger size="sm" className="w-42.5" aria-label="Filter status">
-                        <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                        {Object.entries(STATUS_ITEMS).map(([value, label]) => (
-                            <SelectItem key={value} value={value}>
-                                {label}
-                            </SelectItem>
-                        ))}
-                    </SelectContent>
-                </Select>
-
                 <Select
                     items={ASSIGNED_ITEMS}
                     value={assignedTo}

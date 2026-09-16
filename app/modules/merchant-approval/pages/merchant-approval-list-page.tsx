@@ -17,6 +17,7 @@ import { toast } from "~/components/ui/toast"
 import { ApiError } from "~/lib/api"
 import { useHasPermission } from "~/modules/auth"
 import { ApprovalQueueToolbar } from "../components/approval-queue-toolbar"
+import { ApprovalStatusTabs } from "../components/approval-status-tabs"
 import { ApprovalTable } from "../components/approval-table"
 import { useClaimApproval } from "../services/merchant-approval.mutations"
 import { useApprovals } from "../services/merchant-approval.queries"
@@ -132,11 +133,9 @@ export function MerchantApprovalListPage() {
 
             <ApprovalQueueToolbar
                 search={search}
-                status={status}
                 assignedTo={assignedTo}
                 sortValue={`${sort}:${order}`}
                 onSearchChange={(value) => updateParams({ search: value })}
-                onStatusChange={(value) => updateParams({ status: value === "all" ? null : value })}
                 onAssignedChange={(value) => updateParams({ assigned_to: value === "all" ? null : value })}
                 onSortChange={(value) => {
                     const [nextSort, nextOrder] = value.split(":")
@@ -144,6 +143,11 @@ export function MerchantApprovalListPage() {
                 }}
                 onRefresh={() => refetch()}
                 isRefreshing={isFetching && !isLoading}
+            />
+
+            <ApprovalStatusTabs
+                value={status}
+                onValueChange={(value) => updateParams({ status: value === "all" ? null : value })}
             />
 
             {isLoading ? (
