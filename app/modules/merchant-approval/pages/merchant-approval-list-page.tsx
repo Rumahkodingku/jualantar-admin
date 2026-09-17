@@ -10,13 +10,13 @@ import {
 } from "~/components/ui/pagination"
 import { Text } from "~/components/ui/text"
 import { toast } from "~/components/ui/toast"
+import { PageHeader } from "~/components/page-header"
 import { ApiError } from "~/lib/api"
 import { useAuthSession, useHasPermission } from "~/modules/auth"
 import { QueueEmptyState } from "../components/queue/queue-empty-state"
 import { QueueErrorState } from "../components/queue/queue-error-state"
 import { QueueLoadingState } from "../components/queue/queue-loading-state"
 import { QueueMobileCard } from "../components/queue/queue-mobile-card"
-import { QueuePageHeader } from "../components/queue/queue-page-header"
 import { QueueToolbar } from "../components/queue/queue-toolbar"
 import { QueueStatusTabs } from "../components/queue/queue-status-tabs"
 import { QueueSummary } from "../components/queue/queue-summary"
@@ -118,9 +118,14 @@ export function MerchantApprovalListPage() {
 
     return (
         <div className="flex min-w-0 flex-1 flex-col gap-5 md:gap-6">
-            <QueuePageHeader
+            <PageHeader
                 title="Antrean Merchant Approval"
                 description="Pantau dan proses pengajuan merchant dari satu antrean operasional."
+                breadcrumbs={[
+                    { label: "Home", to: "/dashboard" },
+                    { label: "Merchant Approvals", to: "/merchant-approvals" },
+                    { label: "Approval" },
+                ]}
             />
 
             <QueueStatusTabs

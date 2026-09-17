@@ -17,7 +17,7 @@ import { DetailDocumentPreview } from "./detail-document-preview"
 import { DetailOutletCard } from "./detail-outlet-card"
 import { DetailPayoutCard } from "./detail-payout-card"
 import { DetailSnapshotSection } from "./detail-snapshot-section"
-import { maskMiddle } from "./detail-mask"
+import { maskMiddle } from "~/lib/mask"
 
 function EmptyNote({ icon: Icon, title, description }: { icon: LucideIcon; title: string; description: string }) {
     return (

@@ -1,5 +1,4 @@
 import type { ReactNode } from "react"
-
 import { Text } from "~/components/ui/text"
 import { cn } from "~/lib/utils"
 
@@ -29,7 +28,7 @@ export function DetailItem({ label, value, mono, prominent, muted, className }: 
             </Text>
             <div
                 className={cn(
-                    "mt-0.5 break-words text-foreground",
+                    "mt-0.5 wrap-break-word text-foreground",
                     prominent ? "text-base font-semibold tracking-tight" : "text-sm font-medium",
                     mono && "font-mono text-xs tracking-tight",
                     muted && "text-muted-foreground",

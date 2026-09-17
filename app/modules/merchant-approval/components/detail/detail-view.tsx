@@ -239,6 +239,8 @@ export function DetailView({ approval }: { approval: ApprovalDetail }) {
 
     return (
         <div className="flex min-w-0 flex-1 flex-col gap-5 md:gap-6">
+           
+
             <Card className="min-w-0 overflow-hidden">
                 <CardHeader className="gap-4">
                     <div className="flex flex-wrap items-start justify-between gap-4">
@@ -367,7 +369,7 @@ export function DetailView({ approval }: { approval: ApprovalDetail }) {
             <Tabs defaultValue="data" className="min-w-0">
                 <TabsList
                     variant="line"
-                    className="scrollbar-thumb-rounded-full mb-4 scrollbar-thin w-full max-w-full scrollbar-thumb-border scrollbar-track-transparent justify-start overflow-x-auto pb-1.5 scrollbar-hover:scrollbar-thumb-muted-foreground"
+                    className="scrollbar-thumb-rounded-full mb-4 scrollbar-thin max-w-full scrollbar-thumb-border scrollbar-track-transparent justify-start overflow-x-auto pb-1.5 scrollbar-hover:scrollbar-thumb-muted-foreground"
                 >
                     <TabsTrigger value="data" className="shrink-0">
                         Data Merchant
