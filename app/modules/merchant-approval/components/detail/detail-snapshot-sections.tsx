@@ -1,9 +1,9 @@
-import type { ReactNode } from "react"
-import { cn } from "~/lib/utils"
+import { Building2, Contact, FileText, Landmark, Layers, MapPin, Store, Tags, type LucideIcon } from "lucide-react"
 
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "~/components/ui/accordion"
+import { Accordion } from "~/components/ui/accordion"
 import { Text } from "~/components/ui/text"
 import { formatDate } from "~/lib/format"
+import { cn } from "~/lib/utils"
 import {
     geographyLabel,
     IDENTITY_TYPE_LABELS,
@@ -12,60 +12,28 @@ import {
     SERVICE_AREA_TYPE_LABELS,
 } from "../../services/merchant-approval.mappers"
 import type { ApplicationSnapshotData } from "../../types/merchant-approval.types"
+import { DetailFieldGrid, DetailItem } from "./detail-detail-item"
 import { DetailDocumentPreview } from "./detail-document-preview"
+import { DetailOutletCard } from "./detail-outlet-card"
+import { DetailPayoutCard } from "./detail-payout-card"
+import { DetailSnapshotSection } from "./detail-snapshot-section"
+import { maskMiddle } from "./detail-mask"
 
-function SnapshotSection({
-    value,
-    title,
-    description,
-    children,
-}: {
-    value: string
-    title: string
-    description?: string
-    children: ReactNode
-}) {
+function EmptyNote({ icon: Icon, title, description }: { icon: LucideIcon; title: string; description: string }) {
     return (
-        <AccordionItem value={value} className="rounded-xl border border-border bg-card px-4 not-last:border-b">
-            <AccordionTrigger className="py-3.5 hover:no-underline">
-                <div className="min-w-0">
-                    <Text variant="sm" weight="semibold" className="text-foreground">
-                        {title}
-                    </Text>
-                    {description && (
-                        <Text variant="xs" className="mt-0.5 text-muted-foreground">
-                            {description}
-                        </Text>
-                    )}
-                </div>
-            </AccordionTrigger>
-            <AccordionContent>{children}</AccordionContent>
-        </AccordionItem>
-    )
-}
-
-function FieldGrid({ children }: { children: ReactNode }) {
-    return <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">{children}</div>
-}
-
-function DetailItem({ label, value, mono }: { label: string; value: ReactNode; mono?: boolean }) {
-    return (
-        <div className="min-w-0">
-            <Text variant="xs" className="text-muted-foreground">
-                {label}
-            </Text>
-            <div className={cn("mt-0.5 text-sm wrap-break-word text-foreground", mono && "font-mono text-xs")}>
-                {value === null || value === undefined || value === "" ? "-" : value}
+        <div className="flex items-start gap-3 rounded-lg border border-dashed border-border bg-muted/20 p-4">
+            <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-muted text-muted-foreground">
+                <Icon aria-hidden="true" className="size-4" />
+            </span>
+            <div className="min-w-0">
+                <Text variant="sm" weight="medium" className="text-foreground">
+                    {title}
+                </Text>
+                <Text variant="xs" className="mt-0.5 text-muted-foreground">
+                    {description}
+                </Text>
             </div>
         </div>
-    )
-}
-
-function EmptyText({ children }: { children: ReactNode }) {
-    return (
-        <Text variant="sm" className="text-muted-foreground">
-            {children}
-        </Text>
     )
 }
 
@@ -75,47 +43,68 @@ export function DetailSnapshotSections({ snapshot }: { snapshot: ApplicationSnap
     const identity = subjects.merchant_identity?.data
     const legalEntity = subjects.legal_entity?.data
     const service = subjects.service?.data
+    const activeOutletCount = subjects.merchant_outlet.filter((outlet) => outlet.data.status === "active").length
 
     return (
         <Accordion multiple defaultValue={["business"]} className="gap-3">
-            <SnapshotSection value="business" title="Bisnis">
+            <DetailSnapshotSection
+                value="business"
+                icon={Store}
+                title="Informasi Bisnis"
+                description="Informasi utama merchant"
+                guide="Periksa kesesuaian data dengan dokumen pendukung merchant."
+            >
                 {business ? (
-                    <FieldGrid>
-                        <DetailItem label="Nama Bisnis" value={business.business_name} />
-                        <DetailItem label="Slug" value={business.slug} mono />
+                    <DetailFieldGrid>
+                        <DetailItem label="Nama Bisnis" value={business.business_name} prominent />
                         <DetailItem
                             label="Tipe Merchant"
                             value={business.type ? MERCHANT_TYPE_LABELS[business.type] : null}
+                            prominent
                         />
+                        <DetailItem label="Slug" value={business.slug} mono muted />
                         <div className="sm:col-span-2 lg:col-span-3">
                             <DetailItem label="Deskripsi" value={business.description} />
                         </div>
-                    </FieldGrid>
+                    </DetailFieldGrid>
                 ) : (
-                    <EmptyText>Data bisnis tidak tersedia.</EmptyText>
+                    <EmptyNote
+                        icon={Store}
+                        title="Data bisnis belum tersedia"
+                        description="Informasi merchant tidak ditemukan pada snapshot pengajuan ini."
+                    />
                 )}
-            </SnapshotSection>
+            </DetailSnapshotSection>
 
-            <SnapshotSection value="identity" title="Identitas Pemilik">
+            <DetailSnapshotSection
+                value="identity"
+                icon={Contact}
+                title="Identitas Pemilik"
+                guide="Periksa kesesuaian identitas dengan dokumen KTP/SIM/Paspor."
+            >
                 {identity ? (
-                    <FieldGrid>
-                        <DetailItem label="Nama Lengkap" value={identity.full_name} />
+                    <DetailFieldGrid>
+                        <DetailItem label="Nama Lengkap" value={identity.full_name} prominent />
                         <DetailItem
                             label="Jenis Identitas"
                             value={IDENTITY_TYPE_LABELS[identity.id_type] ?? identity.id_type}
                         />
-                        <DetailItem label="Nomor Identitas" value={identity.id_number} mono />
+                        <DetailItem label="Nomor Identitas" value={maskMiddle(identity.id_number)} mono />
                         <DetailItem label="Tanggal Lahir" value={formatDate(identity.birth_date)} />
-                    </FieldGrid>
+                    </DetailFieldGrid>
                 ) : (
-                    <EmptyText>Data identitas tidak tersedia.</EmptyText>
+                    <EmptyNote
+                        icon={Contact}
+                        title="Identitas pemilik belum tersedia"
+                        description="Data identitas pemilik tidak ditemukan pada snapshot pengajuan ini."
+                    />
                 )}
-            </SnapshotSection>
+            </DetailSnapshotSection>
 
-            <SnapshotSection value="legal_entity" title="Badan Hukum">
+            <DetailSnapshotSection value="legal_entity" icon={Building2} title="Badan Hukum">
                 {legalEntity ? (
-                    <FieldGrid>
-                        <DetailItem label="Nama Badan Hukum" value={legalEntity.name} />
+                    <DetailFieldGrid>
+                        <DetailItem label="Nama Badan Hukum" value={legalEntity.name} prominent />
                         <DetailItem
                             label="Jenis Badan Hukum"
                             value={LEGAL_ENTITY_TYPE_LABELS[legalEntity.entity_type] ?? legalEntity.entity_type}
@@ -127,25 +116,39 @@ export function DetailSnapshotSections({ snapshot }: { snapshot: ApplicationSnap
                         </div>
                         <DetailItem label="Wilayah" value={geographyLabel(legalEntity)} />
                         <DetailItem label="Kode Pos" value={legalEntity.postal_code} />
-                    </FieldGrid>
+                    </DetailFieldGrid>
                 ) : (
-                    <EmptyText>Tidak ada badan hukum (merchant perorangan).</EmptyText>
+                    <EmptyNote
+                        icon={Building2}
+                        title="Tidak ada badan hukum"
+                        description="Merchant terdaftar sebagai merchant perorangan."
+                    />
                 )}
-            </SnapshotSection>
+            </DetailSnapshotSection>
 
-            <SnapshotSection value="service" title="Layanan">
+            <DetailSnapshotSection
+                value="service"
+                icon={Layers}
+                title="Layanan"
+                description="Layanan yang dipilih merchant."
+            >
                 {service ? (
-                    <FieldGrid>
-                        <DetailItem label="Nama Layanan" value={service.name} />
-                        <DetailItem label="Slug" value={service.slug} mono />
-                    </FieldGrid>
+                    <DetailFieldGrid>
+                        <DetailItem label="Nama Layanan" value={service.name} prominent />
+                        <DetailItem label="Slug" value={service.slug} mono muted />
+                    </DetailFieldGrid>
                 ) : (
-                    <EmptyText>Data layanan tidak tersedia.</EmptyText>
+                    <EmptyNote
+                        icon={Layers}
+                        title="Data layanan tidak tersedia"
+                        description="Layanan tidak ditemukan pada snapshot pengajuan ini."
+                    />
                 )}
-            </SnapshotSection>
+            </DetailSnapshotSection>
 
-            <SnapshotSection
+            <DetailSnapshotSection
                 value="category"
+                icon={Tags}
                 title="Kategori"
                 description={`${subjects.merchant_category.length} kategori terdaftar`}
             >
@@ -154,9 +157,9 @@ export function DetailSnapshotSections({ snapshot }: { snapshot: ApplicationSnap
                         {subjects.merchant_category.map((category, index) => (
                             <li
                                 key={category.subject_id}
-                                className="flex items-center justify-between gap-3 rounded-lg bg-muted/40 px-3 py-2"
+                                className="flex items-center justify-between gap-3 rounded-lg bg-muted/40 px-3 py-2 transition-colors hover:bg-muted/60"
                             >
-                                <Text variant="sm" truncate className="text-foreground">
+                                <Text variant="sm" weight="medium" className="min-w-0 truncate text-foreground">
                                     {category.data.name ?? category.data.slug ?? `Kategori ${index + 1}`}
                                 </Text>
                                 <Text variant="xs" className="shrink-0 text-muted-foreground">
@@ -166,59 +169,42 @@ export function DetailSnapshotSections({ snapshot }: { snapshot: ApplicationSnap
                         ))}
                     </ul>
                 ) : (
-                    <EmptyText>Belum ada kategori.</EmptyText>
+                    <EmptyNote
+                        icon={Tags}
+                        title="Belum ada kategori"
+                        description="Merchant belum mendaftarkan kategori pada pengajuan ini."
+                    />
                 )}
-            </SnapshotSection>
+            </DetailSnapshotSection>
 
-            <SnapshotSection
+            <DetailSnapshotSection
                 value="outlet"
+                icon={MapPin}
                 title="Outlet"
-                description={`${subjects.merchant_outlet.length} outlet aktif`}
+                description={`${activeOutletCount} outlet aktif`}
+                guide="Periksa kesesuaian data outlet dengan foto dan dokumen pendukung."
             >
                 {subjects.merchant_outlet.length > 0 ? (
                     <div className="flex flex-col gap-3">
                         {subjects.merchant_outlet.map((outlet) => (
-                            <div key={outlet.subject_id} className="rounded-lg border border-border p-3">
-                                <div className="flex flex-wrap items-center justify-between gap-2">
-                                    <Text variant="sm" weight="medium" className="text-foreground">
-                                        {outlet.data.name}
-                                    </Text>
-                                    <Text variant="xs" className="text-muted-foreground">
-                                        {outlet.data.status === "active" ? "Aktif" : "Nonaktif"}
-                                    </Text>
-                                </div>
-                                <div className="mt-3">
-                                    <FieldGrid>
-                                        <DetailItem label="Telepon" value={outlet.data.phone} />
-                                        <DetailItem label="Email" value={outlet.data.email} />
-                                        <DetailItem
-                                            label="Tipe Area Layanan"
-                                            value={
-                                                SERVICE_AREA_TYPE_LABELS[outlet.data.service_area_type] ??
-                                                outlet.data.service_area_type
-                                            }
-                                        />
-                                        <DetailItem label="Radius (km)" value={outlet.data.service_radius_km} />
-                                        <DetailItem label="Kode Pos" value={outlet.data.postal_code} />
-                                        <DetailItem label="Wilayah" value={geographyLabel(outlet.data)} />
-                                        <DetailItem label="Jumlah Foto" value={outlet.data.photos.length} />
-                                        <div className="sm:col-span-2 lg:col-span-3">
-                                            <DetailItem label="Alamat" value={outlet.data.address} />
-                                        </div>
-                                    </FieldGrid>
-                                </div>
-                            </div>
+                            <DetailOutletCard key={outlet.subject_id} outlet={outlet.data} />
                         ))}
                     </div>
                 ) : (
-                    <EmptyText>Belum ada outlet.</EmptyText>
+                    <EmptyNote
+                        icon={MapPin}
+                        title="Belum ada outlet"
+                        description="Merchant belum menambahkan outlet pada pengajuan ini."
+                    />
                 )}
-            </SnapshotSection>
+            </DetailSnapshotSection>
 
-            <SnapshotSection
+            <DetailSnapshotSection
                 value="document"
+                icon={FileText}
                 title="Dokumen"
                 description={`${subjects.merchant_document.length} dokumen diunggah`}
+                guide="Periksa kesesuaian dokumen dengan data yang diajukan."
             >
                 {subjects.merchant_document.length > 0 ? (
                     <div className="flex flex-col gap-2">
@@ -227,35 +213,35 @@ export function DetailSnapshotSections({ snapshot }: { snapshot: ApplicationSnap
                         ))}
                     </div>
                 ) : (
-                    <EmptyText>Belum ada dokumen.</EmptyText>
+                    <EmptyNote
+                        icon={FileText}
+                        title="Belum ada dokumen"
+                        description="Merchant belum mengunggah dokumen pada pengajuan ini."
+                    />
                 )}
-            </SnapshotSection>
+            </DetailSnapshotSection>
 
-            <SnapshotSection
+            <DetailSnapshotSection
                 value="payout"
+                icon={Landmark}
                 title="Pencairan Dana"
                 description={`${subjects.payout_account.length} rekening terdaftar`}
+                guide="Pastikan nama pemilik rekening sesuai identitas merchant."
             >
                 {subjects.payout_account.length > 0 ? (
                     <div className="flex flex-col gap-3">
                         {subjects.payout_account.map((account) => (
-                            <div key={account.subject_id} className="rounded-lg border border-border p-3">
-                                <FieldGrid>
-                                    <DetailItem label="Bank" value={account.data.bank_name} />
-                                    <DetailItem label="Nomor Rekening" value={account.data.account_number} mono />
-                                    <DetailItem label="Nama Pemilik" value={account.data.account_name} />
-                                    <DetailItem
-                                        label="Rekening Utama"
-                                        value={account.data.is_primary ? "Ya" : "Tidak"}
-                                    />
-                                </FieldGrid>
-                            </div>
+                            <DetailPayoutCard key={account.subject_id} account={account.data} />
                         ))}
                     </div>
                 ) : (
-                    <EmptyText>Belum ada rekening pencairan.</EmptyText>
+                    <EmptyNote
+                        icon={Landmark}
+                        title="Belum ada rekening pencairan"
+                        description="Merchant belum menambahkan rekening pencairan pada pengajuan ini."
+                    />
                 )}
-            </SnapshotSection>
+            </DetailSnapshotSection>
         </Accordion>
     )
 }

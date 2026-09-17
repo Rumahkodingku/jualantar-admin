@@ -1,8 +1,9 @@
-import { Check, ClipboardCheck, PencilLine, Undo2, X } from "lucide-react"
+import { Check, ClipboardCheck, Inbox, PencilLine, Undo2, X } from "lucide-react"
 import { useState } from "react"
 
 import { Button } from "~/components/ui/button"
 import { Card, CardContent, CardHeader } from "~/components/ui/card"
+import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "~/components/ui/empty"
 import { Progress } from "~/components/ui/progress"
 import { Spinner } from "~/components/ui/spinner"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs"
@@ -386,9 +387,17 @@ export function DetailView({ approval }: { approval: ApprovalDetail }) {
                     {approval.current_snapshot ? (
                         <DetailSnapshotSections snapshot={approval.current_snapshot.data} />
                     ) : (
-                        <Text variant="sm" className="text-muted-foreground">
-                            Snapshot pengajuan tidak tersedia.
-                        </Text>
+                        <Empty className="border">
+                            <EmptyHeader>
+                                <EmptyMedia variant="icon">
+                                    <Inbox aria-hidden="true" />
+                                </EmptyMedia>
+                                <EmptyTitle>Data merchant tidak tersedia</EmptyTitle>
+                                <EmptyDescription>
+                                    Pengajuan ini belum memiliki snapshot data merchant yang dapat ditampilkan.
+                                </EmptyDescription>
+                            </EmptyHeader>
+                        </Empty>
                     )}
                 </TabsContent>
 
