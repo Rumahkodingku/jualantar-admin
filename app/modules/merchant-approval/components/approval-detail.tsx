@@ -364,7 +364,10 @@ export function ApprovalDetailView({ approval }: { approval: ApprovalDetail }) {
             </Card>
 
             <Tabs defaultValue="data" className="min-w-0">
-                <TabsList variant="line" className="mb-4 w-full max-w-full justify-start overflow-x-auto pb-1.5">
+                <TabsList
+                    variant="line"
+                    className="scrollbar-thumb-rounded-full mb-4 scrollbar-thin w-full max-w-full scrollbar-thumb-border scrollbar-track-transparent justify-start overflow-x-auto pb-1.5 scrollbar-hover:scrollbar-thumb-muted-foreground"
+                >
                     <TabsTrigger value="data" className="shrink-0">
                         Data Merchant
                     </TabsTrigger>

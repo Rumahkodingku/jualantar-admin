@@ -28,7 +28,10 @@ export function ApprovalStatusTabs({ value, onValueChange }: ApprovalStatusTabsP
 
     return (
         <Tabs value={value} onValueChange={(next) => onValueChange(String(next))} className="min-w-0">
-            <TabsList variant="line" className="w-full max-w-full justify-start gap-2 overflow-x-auto pb-1.5">
+            <TabsList
+                variant="line"
+                className="scrollbar-thumb-rounded-full scrollbar-thin w-full max-w-full scrollbar-thumb-border scrollbar-track-transparent justify-start gap-2 overflow-x-auto pb-1.5 scrollbar-hover:scrollbar-thumb-muted-foreground"
+            >
                 {STATUS_TABS.map((tab) => {
                     const count = counts?.[tab.value]
 
