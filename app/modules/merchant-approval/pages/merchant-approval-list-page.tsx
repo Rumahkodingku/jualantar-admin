@@ -207,7 +207,7 @@ export function MerchantApprovalListPage() {
                     />
 
                     <div className="flex flex-col items-center justify-between gap-3 sm:flex-row">
-                        <Text variant="sm" className="text-muted-foreground">
+                        <Text variant="xs" weight="semibold" className="text-muted-foreground">
                             Menampilkan {data.items.length} dari {meta?.total ?? 0} pengajuan
                         </Text>
 
@@ -217,7 +217,9 @@ export function MerchantApprovalListPage() {
                                     <PaginationPrevious
                                         href="#"
                                         aria-disabled={!canGoPrevious}
-                                        className={!canGoPrevious ? "pointer-events-none opacity-50" : undefined}
+                                        className={
+                                            !canGoPrevious ? "pointer-events-none font-semibold opacity-50" : undefined
+                                        }
                                         onClick={(event) => {
                                             event.preventDefault()
                                             if (canGoPrevious) updateParams({ page: String(page - 1) }, false)
@@ -226,7 +228,7 @@ export function MerchantApprovalListPage() {
                                     />
                                 </PaginationItem>
                                 <PaginationItem>
-                                    <Text variant="sm" className="px-2 text-muted-foreground">
+                                    <Text variant="xs" weight="semibold" className="px-2 text-muted-foreground">
                                         Halaman {page} dari {meta?.last_page ?? 1}
                                     </Text>
                                 </PaginationItem>

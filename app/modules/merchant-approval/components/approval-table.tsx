@@ -2,7 +2,6 @@ import { createColumnHelper, tableFeatures, useTable } from "@tanstack/react-tab
 import { ClipboardCheck } from "lucide-react"
 import { useMemo } from "react"
 import { Link } from "react-router"
-
 import { Button } from "~/components/ui/button"
 import { Spinner } from "~/components/ui/spinner"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "~/components/ui/table"
@@ -94,7 +93,7 @@ export function ApprovalTable({ data, currentUserId, canClaim, onClaim, claiming
                             {canClaim(row.original) && (
                                 <Button
                                     size="sm"
-                                    variant="secondary"
+                                    variant="default"
                                     disabled={claimingId === row.original.id}
                                     onClick={() => onClaim(row.original.id)}
                                 >

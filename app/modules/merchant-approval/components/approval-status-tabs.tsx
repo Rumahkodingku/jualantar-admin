@@ -29,7 +29,7 @@ export function ApprovalStatusTabs({ value, onValueChange }: ApprovalStatusTabsP
 
     return (
         <Tabs value={value} onValueChange={(next) => onValueChange(String(next))}>
-            <TabsList variant="line" className="w-full justify-start">
+            <TabsList variant="line" className="justify-start">
                 {STATUS_TABS.map((tab) => {
                     const count = counts?.[tab.value]
 
@@ -37,7 +37,7 @@ export function ApprovalStatusTabs({ value, onValueChange }: ApprovalStatusTabsP
                         <TabsTrigger
                             key={tab.value}
                             value={tab.value}
-                            className="font-semibold after:bg-primary! data-active:text-primary!"
+                            className="text-xs font-semibold after:bg-primary! data-active:text-primary!"
                         >
                             {tab.label}
                             {count !== undefined && (
