@@ -1,5 +1,5 @@
-import { Calendar, Check, Copy, Hash, Image, Inbox, MapPin, UserRound, Utensils } from "lucide-react"
-import { useMemo, useState } from "react"
+import { Component, Copy, Image, Inbox, MapPin, NotebookPen, Store, Timeline } from "lucide-react"
+import { useMemo, useState, type ReactNode } from "react"
 
 import { Button } from "~/components/ui/button"
 import { Card, CardContent } from "~/components/ui/card"
@@ -8,7 +8,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs"
 import { Text } from "~/components/ui/text"
 import { toast } from "~/components/ui/toast"
 import { ApiError } from "~/lib/api"
-import { cn } from "~/lib/utils"
 import { useAuthSession, useHasPermission } from "~/modules/auth"
 import type { RejectionInput, RevisionInput } from "../../schemas/merchant-approval.schemas"
 import {
@@ -19,6 +18,7 @@ import {
 } from "../../services/merchant-approval.mappers"
 import {
     useApproveApplication,
+    useClaimApproval,
     useRejectApplication,
     useReleaseApproval,
     useRequestRevision,
@@ -35,9 +35,10 @@ import { DetailRejectionDialog } from "./detail-rejection-dialog"
 import { DetailRevisionDialog } from "./detail-revision-dialog"
 import { DetailRevisionHistory } from "./detail-revision-history"
 import { DetailSnapshotSections } from "./detail-snapshot-sections"
-import { formatDate, formatDateTime, formatRelativeDate } from "~/lib/format"
+import { formatDateTime, formatRelativeDate } from "~/lib/format"
 import { PageHeader } from "~/components/page-header"
-import { ApprovalTimeline, ApprovalTimelineItem, type ApprovalStatus, type ApprovalStep } from "./approval-timeline"
+import { ApprovalTimeline, type ApprovalStatus, type ApprovalStep } from "./approval-timeline"
+import { DetailSidebar } from "./detail-sidebar"
 
 function subjectKey(subject: ReviewableSubject): string {
     return `${subject.subjectType}:${subject.subjectId}`
@@ -84,12 +85,26 @@ function errorMessage(error: unknown, fallback: string): string {
 //     )
 // }
 
+function DetailTabLayout({ children, sidebar }: { children: ReactNode; sidebar: ReactNode }) {
+    return (
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-10">
+            <div className="min-w-0 lg:col-span-7">{children}</div>
+            <aside className="min-w-0 lg:col-span-3">{sidebar}</aside>
+        </div>
+    )
+}
+
 export function DetailView({ approval }: { approval: ApprovalDetail }) {
     const { data: session } = useAuthSession()
     const currentUserId = session?.id
 
+    const canClaimPermission = useHasPermission("merchant.approval.claim")
     const canReviewPermission = useHasPermission("merchant.approval.review")
+    const canRevisionPermission = useHasPermission("merchant.approval.revision")
+    const canRejectPermission = useHasPermission("merchant.approval.reject")
+    const canApprovePermission = useHasPermission("merchant.approval.approve")
 
+    const claim = useClaimApproval()
     const release = useReleaseApproval()
     const review = useReviewComponent()
     const revision = useRequestRevision()
@@ -103,10 +118,16 @@ export function DetailView({ approval }: { approval: ApprovalDetail }) {
     const [reviewingKey, setReviewingKey] = useState<string | null>(null)
 
     const status = approval.application.status
+    const isPending = status === "pending"
     const isInReview = status === "in_review"
     const isAssignedToMe = Boolean(currentUserId && approval.assigned_to === currentUserId)
 
+    const canClaim = canClaimPermission && isPending && !approval.assigned_to
+    const canRelease = canClaimPermission && isInReview && isAssignedToMe
     const canReview = canReviewPermission && isInReview && isAssignedToMe
+    const canRevision = canRevisionPermission && isInReview && isAssignedToMe
+    const canReject = canRejectPermission && isInReview && isAssignedToMe
+    const canApprove = canApprovePermission && isInReview && isAssignedToMe
 
     const subjects = collectReviewableSubjects(approval.current_snapshot?.data ?? null)
     const progress = summarizeReviewProgress(subjects, approval.reviews)
@@ -155,6 +176,23 @@ export function DetailView({ approval }: { approval: ApprovalDetail }) {
 
     const handleViewPhoto = () => {
         if (merchantPhoto) window.open(merchantPhoto, "_blank", "noopener,noreferrer")
+    }
+
+    const handleClaim = () => {
+        claim.mutate(approval.id, {
+            onSuccess: () =>
+                toast.add({
+                    title: "Review diklaim",
+                    description: "Anda sekarang menjadi reviewer pengajuan ini.",
+                    type: "success",
+                }),
+            onError: (error) =>
+                toast.add({
+                    title: "Gagal mengklaim",
+                    description: errorMessage(error, "Terjadi kesalahan."),
+                    type: "error",
+                }),
+        })
     }
 
     const handleRelease = () => {
@@ -262,6 +300,28 @@ export function DetailView({ approval }: { approval: ApprovalDetail }) {
                 }),
         })
     }
+
+    const sidebar = (
+        <DetailSidebar
+            approval={approval}
+            subjects={subjects}
+            timelineSteps={timelineSteps}
+            currentUserId={currentUserId}
+            canClaim={canClaim}
+            canRelease={canRelease}
+            canRevision={canRevision}
+            canReject={canReject}
+            canApprove={canApprove}
+            isSubmitting={
+                claim.isPending || release.isPending || revision.isPending || reject.isPending || approve.isPending
+            }
+            onClaim={handleClaim}
+            onOpenRelease={() => setReleaseOpen(true)}
+            onOpenRevision={() => setRevisionOpen(true)}
+            onOpenReject={() => setRejectOpen(true)}
+            onOpenApprove={() => setApproveOpen(true)}
+        />
+    )
 
     return (
         <div className="flex min-w-0 flex-1 flex-col gap-5 md:gap-6">
@@ -505,71 +565,103 @@ export function DetailView({ approval }: { approval: ApprovalDetail }) {
                 </CardContent>
             </Card>
 
+            {/* Tab Bar */}
             <Tabs defaultValue="data" className="min-w-0">
-                <TabsList
-                    variant="line"
-                    className="scrollbar-thumb-rounded-full mb-4 scrollbar-thin max-w-full scrollbar-thumb-border scrollbar-track-transparent justify-start overflow-x-auto pb-1.5 scrollbar-hover:scrollbar-thumb-muted-foreground"
-                >
-                    <TabsTrigger value="data" className="shrink-0">
-                        Data Merchant
+                <TabsList variant="line" className="mb-6">
+                    <TabsTrigger
+                        value="data"
+                        className="shrink-0 data-active:text-primary data-active:after:bg-primary dark:data-active:text-primary"
+                    >
+                        <Store />
+                        <Text variant="xs" weight="semibold">
+                            Data Merchant
+                        </Text>
                     </TabsTrigger>
-                    <TabsTrigger value="review" className="shrink-0">
-                        Review Komponen
+                    <TabsTrigger
+                        value="review"
+                        className="shrink-0 data-active:text-primary data-active:after:bg-primary dark:data-active:text-primary"
+                    >
+                        <Component />
+                        <Text variant="xs" weight="semibold">
+                            Review Komponen
+                        </Text>
                     </TabsTrigger>
-                    <TabsTrigger value="revisions" className="shrink-0">
-                        Riwayat Revisi
+                    <TabsTrigger
+                        value="revisions"
+                        className="shrink-0 data-active:text-primary data-active:after:bg-primary dark:data-active:text-primary"
+                    >
+                        <NotebookPen />
+                        <Text variant="xs" weight="semibold">
+                            Riwayat Revisi
+                        </Text>
                     </TabsTrigger>
-                    <TabsTrigger value="timeline" className="shrink-0">
-                        Timeline
+                    <TabsTrigger
+                        value="timeline"
+                        className="shrink-0 data-active:text-primary data-active:after:bg-primary dark:data-active:text-primary"
+                    >
+                        <Timeline />
+                        <Text variant="xs" weight="semibold">
+                            Timeline
+                        </Text>
                     </TabsTrigger>
                 </TabsList>
 
                 <TabsContent value="data">
-                    {approval.current_snapshot ? (
-                        <DetailSnapshotSections snapshot={approval.current_snapshot.data} />
-                    ) : (
-                        <Empty className="border">
-                            <EmptyHeader>
-                                <EmptyMedia variant="icon">
-                                    <Inbox aria-hidden="true" />
-                                </EmptyMedia>
-                                <EmptyTitle>Data merchant tidak tersedia</EmptyTitle>
-                                <EmptyDescription>
-                                    Pengajuan ini belum memiliki snapshot data merchant yang dapat ditampilkan.
-                                </EmptyDescription>
-                            </EmptyHeader>
-                        </Empty>
-                    )}
+                    <DetailTabLayout sidebar={sidebar}>
+                        {approval.current_snapshot ? (
+                            <DetailSnapshotSections snapshot={approval.current_snapshot.data} />
+                        ) : (
+                            <Empty className="border">
+                                <EmptyHeader>
+                                    <EmptyMedia variant="icon">
+                                        <Inbox aria-hidden="true" />
+                                    </EmptyMedia>
+
+                                    <EmptyTitle>Data merchant tidak tersedia</EmptyTitle>
+
+                                    <EmptyDescription>
+                                        Pengajuan ini belum memiliki snapshot data merchant yang dapat ditampilkan.
+                                    </EmptyDescription>
+                                </EmptyHeader>
+                            </Empty>
+                        )}
+                    </DetailTabLayout>
                 </TabsContent>
 
                 <TabsContent value="review">
-                    {subjects.length > 0 ? (
-                        <div className="grid gap-4 xl:grid-cols-2">
-                            {subjects.map((subject) => (
-                                <DetailComponentReviewCard
-                                    key={subjectKey(subject)}
-                                    subject={subject}
-                                    review={findReview(approval.reviews, subject.subjectType, subject.subjectId)}
-                                    canReview={canReview}
-                                    isSubmitting={review.isPending && reviewingKey === subjectKey(subject)}
-                                    onVerify={(note) => handleReview(subject, "verified", note)}
-                                    onReject={(note) => handleReview(subject, "rejected", note)}
-                                />
-                            ))}
-                        </div>
-                    ) : (
-                        <Text variant="sm" className="text-muted-foreground">
-                            Tidak ada komponen untuk direview.
-                        </Text>
-                    )}
+                    <DetailTabLayout sidebar={sidebar}>
+                        {subjects.length > 0 ? (
+                            <div className="grid gap-4 xl:grid-cols-2">
+                                {subjects.map((subject) => (
+                                    <DetailComponentReviewCard
+                                        key={subjectKey(subject)}
+                                        subject={subject}
+                                        review={findReview(approval.reviews, subject.subjectType, subject.subjectId)}
+                                        canReview={canReview}
+                                        isSubmitting={review.isPending && reviewingKey === subjectKey(subject)}
+                                        onVerify={(note) => handleReview(subject, "verified", note)}
+                                        onReject={(note) => handleReview(subject, "rejected", note)}
+                                    />
+                                ))}
+                            </div>
+                        ) : (
+                            <Text variant="sm" className="text-muted-foreground">
+                                Tidak ada komponen untuk direview.
+                            </Text>
+                        )}
+                    </DetailTabLayout>
                 </TabsContent>
 
                 <TabsContent value="revisions">
-                    <DetailRevisionHistory revisions={approval.revisions} currentUserId={currentUserId} />
+                    <DetailTabLayout sidebar={sidebar}>
+                        <DetailRevisionHistory revisions={approval.revisions} currentUserId={currentUserId} />
+                    </DetailTabLayout>
                 </TabsContent>
 
                 <TabsContent value="timeline">
-                    <DetailTimeline events={approval.events} currentUserId={currentUserId} />
+                    <DetailTabLayout sidebar={sidebar}>
+                        <DetailTimeline events={approval.events} currentUserId={currentUserId} />
+                    </DetailTabLayout>
                 </TabsContent>
             </Tabs>
 

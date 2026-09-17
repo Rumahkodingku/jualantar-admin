@@ -1,15 +1,12 @@
 import { Building2, Contact, FileText, Landmark, Layers, MapPin, Store, Tags, type LucideIcon } from "lucide-react"
-
 import { Accordion } from "~/components/ui/accordion"
 import { Text } from "~/components/ui/text"
 import { formatDate } from "~/lib/format"
-import { cn } from "~/lib/utils"
 import {
     geographyLabel,
     IDENTITY_TYPE_LABELS,
     LEGAL_ENTITY_TYPE_LABELS,
     MERCHANT_TYPE_LABELS,
-    SERVICE_AREA_TYPE_LABELS,
 } from "../../services/merchant-approval.mappers"
 import type { ApplicationSnapshotData } from "../../types/merchant-approval.types"
 import { DetailFieldGrid, DetailItem } from "./detail-detail-item"
@@ -52,7 +49,6 @@ export function DetailSnapshotSections({ snapshot }: { snapshot: ApplicationSnap
                 icon={Store}
                 title="Informasi Bisnis"
                 description="Informasi utama merchant"
-                guide="Periksa kesesuaian data dengan dokumen pendukung merchant."
             >
                 {business ? (
                     <DetailFieldGrid>
@@ -64,7 +60,7 @@ export function DetailSnapshotSections({ snapshot }: { snapshot: ApplicationSnap
                         />
                         <DetailItem label="Slug" value={business.slug} mono muted />
                         <div className="sm:col-span-2 lg:col-span-3">
-                            <DetailItem label="Deskripsi" value={business.description} />
+                            <DetailItem label="Deskripsi Bisnis" value={business.description} />
                         </div>
                     </DetailFieldGrid>
                 ) : (
@@ -80,7 +76,7 @@ export function DetailSnapshotSections({ snapshot }: { snapshot: ApplicationSnap
                 value="identity"
                 icon={Contact}
                 title="Identitas Pemilik"
-                guide="Periksa kesesuaian identitas dengan dokumen KTP/SIM/Paspor."
+                description="Identitas utama pemilik merchant"
             >
                 {identity ? (
                     <DetailFieldGrid>
@@ -101,7 +97,12 @@ export function DetailSnapshotSections({ snapshot }: { snapshot: ApplicationSnap
                 )}
             </DetailSnapshotSection>
 
-            <DetailSnapshotSection value="legal_entity" icon={Building2} title="Badan Hukum">
+            <DetailSnapshotSection
+                value="legal_entity"
+                description="Informasi badan hukum (Khusus merchant perusahaan)"
+                icon={Building2}
+                title="Badan Hukum"
+            >
                 {legalEntity ? (
                     <DetailFieldGrid>
                         <DetailItem label="Nama Badan Hukum" value={legalEntity.name} prominent />
@@ -182,7 +183,6 @@ export function DetailSnapshotSections({ snapshot }: { snapshot: ApplicationSnap
                 icon={MapPin}
                 title="Outlet"
                 description={`${activeOutletCount} outlet aktif`}
-                guide="Periksa kesesuaian data outlet dengan foto dan dokumen pendukung."
             >
                 {subjects.merchant_outlet.length > 0 ? (
                     <div className="flex flex-col gap-3">
@@ -204,7 +204,6 @@ export function DetailSnapshotSections({ snapshot }: { snapshot: ApplicationSnap
                 icon={FileText}
                 title="Dokumen"
                 description={`${subjects.merchant_document.length} dokumen diunggah`}
-                guide="Periksa kesesuaian dokumen dengan data yang diajukan."
             >
                 {subjects.merchant_document.length > 0 ? (
                     <div className="flex flex-col gap-2">
@@ -226,7 +225,6 @@ export function DetailSnapshotSections({ snapshot }: { snapshot: ApplicationSnap
                 icon={Landmark}
                 title="Pencairan Dana"
                 description={`${subjects.payout_account.length} rekening terdaftar`}
-                guide="Pastikan nama pemilik rekening sesuai identitas merchant."
             >
                 {subjects.payout_account.length > 0 ? (
                     <div className="flex flex-col gap-3">

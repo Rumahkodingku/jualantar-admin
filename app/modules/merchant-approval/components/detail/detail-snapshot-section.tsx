@@ -2,6 +2,7 @@ import { Info, type LucideIcon } from "lucide-react"
 import type { ReactNode } from "react"
 
 import { AccordionContent, AccordionItem, AccordionTrigger } from "~/components/ui/accordion"
+import { Alert } from "~/components/ui/alert"
 import { Text } from "~/components/ui/text"
 
 interface DetailSnapshotSectionProps {
@@ -31,17 +32,17 @@ export function DetailSnapshotSection({
                     <Icon aria-hidden="true" className="size-4" />
                 </span>
                 <span className="flex min-w-0 flex-1 flex-col items-start text-left">
-                    <Text variant="sm" weight="semibold" className="text-foreground">
+                    <Text variant="sm" weight="bold" className="text-foreground">
                         {title}
                     </Text>
                     {description && (
-                        <Text variant="xs" className="mt-0.5 text-muted-foreground">
+                        <Text variant="xs" weight="normal" className="mt-0.5 text-muted-foreground">
                             {description}
                         </Text>
                     )}
                 </span>
             </AccordionTrigger>
-            <AccordionContent className="px-4 pb-4">
+            <AccordionContent className="px-6 pb-6">
                 {guide && (
                     <p role="note" className="mb-4 flex items-start gap-2 rounded-lg bg-muted/40 px-3 py-2">
                         <Info aria-hidden="true" className="mt-0.5 size-3.5 shrink-0 text-muted-foreground" />

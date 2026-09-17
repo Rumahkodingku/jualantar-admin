@@ -22,21 +22,13 @@ export function DetailItem({ label, value, mono, prominent, muted, className }: 
     const display = isEmpty ? MISSING : value
 
     return (
-        <div className={cn("min-w-0", className)}>
-            <Text variant="xs" className="text-muted-foreground">
+        <div className={cn("mt-4 flex min-w-0 flex-col", className)}>
+            <Text variant="xs" weight="semibold">
                 {label}
             </Text>
-            <div
-                className={cn(
-                    "mt-0.5 wrap-break-word text-foreground",
-                    prominent ? "text-base font-semibold tracking-tight" : "text-sm font-medium",
-                    mono && "font-mono text-xs tracking-tight",
-                    muted && "text-muted-foreground",
-                    isEmpty && "text-muted-foreground/60"
-                )}
-            >
+            <Text variant="xs" className="mt-1 leading-relaxed text-muted-foreground">
                 {display}
-            </div>
+            </Text>
         </div>
     )
 }

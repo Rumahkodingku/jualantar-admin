@@ -28,10 +28,7 @@ export function QueueStatusTabs({ value, onValueChange }: QueueStatusTabsProps) 
 
     return (
         <Tabs value={value} onValueChange={(next) => onValueChange(String(next))} className="min-w-0">
-            <TabsList
-                variant="line"
-                className="scrollbar-thumb-rounded-full scrollbar-thin max-w-full scrollbar-thumb-border scrollbar-track-transparent justify-start gap-4 overflow-x-auto pb-1.5 scrollbar-hover:scrollbar-thumb-muted-foreground"
-            >
+            <TabsList variant="line" className="">
                 {STATUS_TABS.map((tab) => {
                     const count = counts?.[tab.value]
 
