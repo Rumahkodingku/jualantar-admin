@@ -1,14 +1,14 @@
 import { CheckCircle2, ClipboardList, Eye, FilePenLine, UserRoundPlus, XCircle, type LucideIcon } from "lucide-react"
 
 import { Skeleton } from "~/components/ui/skeleton"
-import { useApprovalSummary } from "../services/merchant-approval.queries"
-import type { ApplicationStatus } from "../types/merchant-approval.types"
-import { ApprovalSummaryCard, type ApprovalSummaryTone } from "./approval-summary-card"
+import { useApprovalSummary } from "../../services/merchant-approval.queries"
+import type { ApplicationStatus } from "../../types/merchant-approval.types"
+import { QueueSummaryCard, type QueueSummaryTone } from "./queue-summary-card"
 
 interface StatusCardConfig {
     status: ApplicationStatus
     label: string
-    tone: ApprovalSummaryTone
+    tone: QueueSummaryTone
     icon: LucideIcon
 }
 
@@ -20,7 +20,7 @@ const STATUS_CARDS: StatusCardConfig[] = [
     { status: "rejected", label: "Ditolak", tone: "rejected", icon: XCircle },
 ]
 
-export function ApprovalSummary() {
+export function QueueSummary() {
     const { data, isLoading, isError } = useApprovalSummary()
 
     if (isLoading) {
@@ -31,7 +31,7 @@ export function ApprovalSummary() {
                 aria-label="Memuat ringkasan approval"
             >
                 {Array.from({ length: 6 }).map((_, index) => (
-                    <Skeleton key={index} className="h-[86px] rounded-xl" />
+                    <Skeleton key={index} className="h-21.5 rounded-xl" />
                 ))}
             </div>
         )
@@ -42,7 +42,7 @@ export function ApprovalSummary() {
     return (
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-6">
             {STATUS_CARDS.map((card) => (
-                <ApprovalSummaryCard
+                <QueueSummaryCard
                     key={card.status}
                     label={card.label}
                     value={data.by_status[card.status]}
@@ -50,12 +50,7 @@ export function ApprovalSummary() {
                     icon={card.icon}
                 />
             ))}
-            <ApprovalSummaryCard
-                label="Belum Ditugaskan"
-                value={data.unassigned}
-                tone="unassigned"
-                icon={UserRoundPlus}
-            />
+            <QueueSummaryCard label="Belum Ditugaskan" value={data.unassigned} tone="unassigned" icon={UserRoundPlus} />
         </div>
     )
 }

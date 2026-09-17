@@ -3,7 +3,7 @@ import { TriangleAlert } from "lucide-react"
 import { Button } from "~/components/ui/button"
 import { Text } from "~/components/ui/text"
 
-export function ApprovalErrorState({ onRetry }: { onRetry: () => void }) {
+export function QueueErrorState({ onRetry }: { onRetry: () => void }) {
     return (
         <div
             role="alert"

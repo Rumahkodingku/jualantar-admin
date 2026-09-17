@@ -10,9 +10,9 @@ import {
     LEGAL_ENTITY_TYPE_LABELS,
     MERCHANT_TYPE_LABELS,
     SERVICE_AREA_TYPE_LABELS,
-} from "../services/merchant-approval.mappers"
-import type { ApplicationSnapshotData } from "../types/merchant-approval.types"
-import { DocumentPreview } from "./document-preview"
+} from "../../services/merchant-approval.mappers"
+import type { ApplicationSnapshotData } from "../../types/merchant-approval.types"
+import { DetailDocumentPreview } from "./detail-document-preview"
 
 function SnapshotSection({
     value,
@@ -54,7 +54,7 @@ function DetailItem({ label, value, mono }: { label: string; value: ReactNode; m
             <Text variant="xs" className="text-muted-foreground">
                 {label}
             </Text>
-            <div className={cn("mt-0.5 text-sm break-words text-foreground", mono && "font-mono text-xs")}>
+            <div className={cn("mt-0.5 text-sm wrap-break-word text-foreground", mono && "font-mono text-xs")}>
                 {value === null || value === undefined || value === "" ? "-" : value}
             </div>
         </div>
@@ -69,7 +69,7 @@ function EmptyText({ children }: { children: ReactNode }) {
     )
 }
 
-export function SnapshotSections({ snapshot }: { snapshot: ApplicationSnapshotData }) {
+export function DetailSnapshotSections({ snapshot }: { snapshot: ApplicationSnapshotData }) {
     const subjects = snapshot.subjects
     const business = subjects.merchant?.data
     const identity = subjects.merchant_identity?.data
@@ -223,7 +223,7 @@ export function SnapshotSections({ snapshot }: { snapshot: ApplicationSnapshotDa
                 {subjects.merchant_document.length > 0 ? (
                     <div className="flex flex-col gap-2">
                         {subjects.merchant_document.map((document) => (
-                            <DocumentPreview key={document.subject_id} document={document.data} />
+                            <DetailDocumentPreview key={document.subject_id} document={document.data} />
                         ))}
                     </div>
                 ) : (

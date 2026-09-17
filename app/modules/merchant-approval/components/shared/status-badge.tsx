@@ -4,8 +4,8 @@ import {
     APPLICATION_STATUS_META,
     REVISION_STATUS_META,
     REVIEW_STATUS_META,
-} from "../services/merchant-approval.mappers"
-import type { ApplicationStatus, RevisionStatus, ReviewStatus } from "../types/merchant-approval.types"
+} from "../../services/merchant-approval.mappers"
+import type { ApplicationStatus, RevisionStatus, ReviewStatus } from "../../types/merchant-approval.types"
 
 interface StatusPillProps {
     label: string

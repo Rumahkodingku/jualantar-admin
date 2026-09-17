@@ -4,9 +4,9 @@ import { Card } from "~/components/ui/card"
 import { Text } from "~/components/ui/text"
 import { cn } from "~/lib/utils"
 
-export type ApprovalSummaryTone = "pending" | "in_review" | "revision" | "approved" | "rejected" | "unassigned"
+export type QueueSummaryTone = "pending" | "in_review" | "revision" | "approved" | "rejected" | "unassigned"
 
-const TONE_STYLES: Record<ApprovalSummaryTone, string> = {
+const TONE_STYLES: Record<QueueSummaryTone, string> = {
     pending: "bg-amber-500/10 text-amber-600 dark:bg-amber-500/15 dark:text-amber-400",
     in_review: "bg-sky-500/10 text-sky-600 dark:bg-sky-500/15 dark:text-sky-400",
     revision: "bg-orange-500/10 text-orange-600 dark:bg-orange-500/15 dark:text-orange-400",
@@ -15,14 +15,14 @@ const TONE_STYLES: Record<ApprovalSummaryTone, string> = {
     unassigned: "bg-muted text-muted-foreground",
 }
 
-interface ApprovalSummaryCardProps {
+interface QueueSummaryCardProps {
     label: string
     value: number
-    tone: ApprovalSummaryTone
+    tone: QueueSummaryTone
     icon: LucideIcon
 }
 
-export function ApprovalSummaryCard({ label, value, tone, icon: Icon }: ApprovalSummaryCardProps) {
+export function QueueSummaryCard({ label, value, tone, icon: Icon }: QueueSummaryCardProps) {
     return (
         <Card className="min-w-0 p-4">
             <div className="flex items-start justify-between gap-3">

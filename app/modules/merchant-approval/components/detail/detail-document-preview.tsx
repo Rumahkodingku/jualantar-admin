@@ -2,10 +2,10 @@ import { FileText } from "lucide-react"
 
 import { Button } from "~/components/ui/button"
 import { Text } from "~/components/ui/text"
-import { DOCUMENT_TYPE_LABELS, formatFileSize } from "../services/merchant-approval.mappers"
-import type { DocumentSubjectData } from "../types/merchant-approval.types"
+import { DOCUMENT_TYPE_LABELS, formatFileSize } from "../../services/merchant-approval.mappers"
+import type { DocumentSubjectData } from "../../types/merchant-approval.types"
 
-export function DocumentPreview({ document }: { document: DocumentSubjectData }) {
+export function DetailDocumentPreview({ document }: { document: DocumentSubjectData }) {
     const isImage = document.mime_type.startsWith("image/")
 
     return (

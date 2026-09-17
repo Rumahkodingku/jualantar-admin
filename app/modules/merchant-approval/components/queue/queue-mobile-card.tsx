@@ -7,12 +7,12 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Spinner } from "~/components/ui/spinner"
 import { Text } from "~/components/ui/text"
 import { formatDateTime } from "~/lib/format"
-import type { ApprovalListItem } from "../types/merchant-approval.types"
-import { ApprovalMerchantIdentity, MerchantTypeBadge, ServiceBadge } from "./approval-merchant"
-import { ApprovalReviewer } from "./approval-reviewer"
-import { ApplicationStatusBadge } from "./approval-status-badge"
+import type { ApprovalListItem } from "../../types/merchant-approval.types"
+import { MerchantIdentity, MerchantTypeBadge, ServiceBadge } from "../shared/merchant"
+import { Reviewer } from "../shared/reviewer"
+import { ApplicationStatusBadge } from "../shared/status-badge"
 
-interface ApprovalMobileCardProps {
+interface QueueMobileCardProps {
     item: ApprovalListItem
     currentUserId?: string
     canClaim: boolean
@@ -20,13 +20,13 @@ interface ApprovalMobileCardProps {
     onClaim: (id: string) => void
 }
 
-export function ApprovalMobileCard({ item, currentUserId, canClaim, isClaiming, onClaim }: ApprovalMobileCardProps) {
+export function QueueMobileCard({ item, currentUserId, canClaim, isClaiming, onClaim }: QueueMobileCardProps) {
     const detailHref = `/merchant-approvals/${item.id}`
 
     return (
         <Card className="min-w-0 p-4">
             <div className="flex items-start justify-between gap-3">
-                <ApprovalMerchantIdentity merchant={item.merchant} />
+                <MerchantIdentity merchant={item.merchant} />
                 {item.application && <ApplicationStatusBadge status={item.application.status} />}
             </div>
 
@@ -61,7 +61,7 @@ export function ApprovalMobileCard({ item, currentUserId, canClaim, isClaiming, 
                         </Text>
                     </dt>
                     <dd className="mt-0.5">
-                        <ApprovalReviewer assignedTo={item.assigned_to} currentUserId={currentUserId} />
+                        <Reviewer assignedTo={item.assigned_to} currentUserId={currentUserId} />
                     </dd>
                 </div>
             </dl>

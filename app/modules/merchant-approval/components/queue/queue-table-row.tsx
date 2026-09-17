@@ -5,12 +5,12 @@ import { Spinner } from "~/components/ui/spinner"
 import { TableCell, TableRow } from "~/components/ui/table"
 import { Text } from "~/components/ui/text"
 import { formatDateTime } from "~/lib/format"
-import type { ApprovalListItem } from "../types/merchant-approval.types"
-import { ApprovalMerchantIdentity, MerchantTypeBadge, ServiceBadge } from "./approval-merchant"
-import { ApprovalReviewer } from "./approval-reviewer"
-import { ApplicationStatusBadge } from "./approval-status-badge"
+import type { ApprovalListItem } from "../../types/merchant-approval.types"
+import { MerchantIdentity, MerchantTypeBadge, ServiceBadge } from "../shared/merchant"
+import { Reviewer } from "../shared/reviewer"
+import { ApplicationStatusBadge } from "../shared/status-badge"
 
-interface ApprovalTableRowProps {
+interface QueueTableRowProps {
     item: ApprovalListItem
     currentUserId?: string
     canClaim: boolean
@@ -18,13 +18,13 @@ interface ApprovalTableRowProps {
     onClaim: (id: string) => void
 }
 
-export function ApprovalTableRow({ item, currentUserId, canClaim, isClaiming, onClaim }: ApprovalTableRowProps) {
+export function QueueTableRow({ item, currentUserId, canClaim, isClaiming, onClaim }: QueueTableRowProps) {
     const detailHref = `/merchant-approvals/${item.id}`
 
     return (
         <TableRow>
             <TableCell className="max-w-72 px-4 py-3">
-                <ApprovalMerchantIdentity merchant={item.merchant} />
+                <MerchantIdentity merchant={item.merchant} />
             </TableCell>
             <TableCell className="px-4 py-3">
                 <Link to={detailHref} className="text-xs font-semibold text-primary underline-offset-4 hover:underline">
@@ -52,7 +52,7 @@ export function ApprovalTableRow({ item, currentUserId, canClaim, isClaiming, on
                 </Text>
             </TableCell>
             <TableCell className="px-4 py-3">
-                <ApprovalReviewer assignedTo={item.assigned_to} currentUserId={currentUserId} />
+                <Reviewer assignedTo={item.assigned_to} currentUserId={currentUserId} />
             </TableCell>
             <TableCell className="sticky right-0 z-10 border-l border-border bg-card px-4 py-3 text-right">
                 <div className="flex items-center justify-start gap-1.5">

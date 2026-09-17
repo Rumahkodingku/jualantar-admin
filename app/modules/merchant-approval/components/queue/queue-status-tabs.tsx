@@ -1,6 +1,6 @@
 import { Badge } from "~/components/ui/badge"
 import { Tabs, TabsList, TabsTrigger } from "~/components/ui/tabs"
-import { useApprovalSummary } from "../services/merchant-approval.queries"
+import { useApprovalSummary } from "../../services/merchant-approval.queries"
 
 const STATUS_TABS = [
     { value: "all", label: "Semua Status" },
@@ -11,12 +11,12 @@ const STATUS_TABS = [
     { value: "rejected", label: "Ditolak" },
 ] as const
 
-interface ApprovalStatusTabsProps {
+interface QueueStatusTabsProps {
     value: string
     onValueChange: (value: string) => void
 }
 
-export function ApprovalStatusTabs({ value, onValueChange }: ApprovalStatusTabsProps) {
+export function QueueStatusTabs({ value, onValueChange }: QueueStatusTabsProps) {
     const { data: summary } = useApprovalSummary()
 
     const counts = summary

@@ -1,8 +1,8 @@
 import { Text } from "~/components/ui/text"
 import { formatDateTime } from "~/lib/format"
-import { REVIEW_COMPONENT_LABELS } from "../services/merchant-approval.mappers"
-import type { ApprovalRevision } from "../types/merchant-approval.types"
-import { RevisionStatusBadge } from "./approval-status-badge"
+import { REVIEW_COMPONENT_LABELS } from "../../services/merchant-approval.mappers"
+import type { ApprovalRevision } from "../../types/merchant-approval.types"
+import { RevisionStatusBadge } from "../shared/status-badge"
 
 function requesterLabel(requestedBy: string | null, currentUserId?: string): string {
     if (!requestedBy) return "Sistem"
@@ -10,7 +10,7 @@ function requesterLabel(requestedBy: string | null, currentUserId?: string): str
     return "Administrator"
 }
 
-export function RevisionHistory({
+export function DetailRevisionHistory({
     revisions,
     currentUserId,
 }: {

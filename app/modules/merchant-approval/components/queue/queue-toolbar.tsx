@@ -2,9 +2,9 @@ import { RotateCw } from "lucide-react"
 
 import { Button } from "~/components/ui/button"
 import { Spinner } from "~/components/ui/spinner"
-import { ApprovalFilter } from "./approval-filter"
+import { QueueFilter } from "./queue-filter"
 
-interface ApprovalQueueToolbarProps {
+interface QueueToolbarProps {
     search: string
     assignedTo: string
     sortValue: string
@@ -15,7 +15,7 @@ interface ApprovalQueueToolbarProps {
     isRefreshing: boolean
 }
 
-export function ApprovalQueueToolbar({
+export function QueueToolbar({
     search,
     assignedTo,
     sortValue,
@@ -24,12 +24,12 @@ export function ApprovalQueueToolbar({
     onSortChange,
     onRefresh,
     isRefreshing,
-}: ApprovalQueueToolbarProps) {
+}: QueueToolbarProps) {
     return (
         <div className="flex w-full flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             {/* Filters */}
             <div className="min-w-0 flex-1">
-                <ApprovalFilter
+                <QueueFilter
                     search={search}
                     assignedTo={assignedTo}
                     sortValue={sortValue}

@@ -11,12 +11,12 @@ import {
 } from "~/components/ui/breadcrumb"
 import { Text } from "~/components/ui/text"
 
-interface ApprovalPageHeaderProps {
+interface QueuePageHeaderProps {
     title: string
     description: string
 }
 
-export function ApprovalPageHeader({ title, description }: ApprovalPageHeaderProps) {
+export function QueuePageHeader({ title, description }: QueuePageHeaderProps) {
     return (
         <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
             <div className="min-w-0">

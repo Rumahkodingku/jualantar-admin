@@ -11,7 +11,7 @@ import {
 } from "~/components/ui/dialog"
 import { Spinner } from "~/components/ui/spinner"
 
-interface ApprovalConfirmDialogProps {
+interface DetailConfirmDialogProps {
     open: boolean
     onOpenChange: (open: boolean) => void
     title: string
@@ -23,7 +23,7 @@ interface ApprovalConfirmDialogProps {
     children?: ReactNode
 }
 
-export function ApprovalConfirmDialog({
+export function DetailConfirmDialog({
     open,
     onOpenChange,
     title,
@@ -33,7 +33,7 @@ export function ApprovalConfirmDialog({
     isSubmitting,
     onConfirm,
     children,
-}: ApprovalConfirmDialogProps) {
+}: DetailConfirmDialogProps) {
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent>

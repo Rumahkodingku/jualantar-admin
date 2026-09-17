@@ -1,6 +1,6 @@
 import { Skeleton } from "~/components/ui/skeleton"
 
-export function ApprovalLoadingState() {
+export function QueueLoadingState() {
     return (
         <div className="flex flex-col gap-4" aria-busy="true" aria-label="Memuat antrean">
             <div className="hidden overflow-hidden rounded-xl border border-border lg:block">

@@ -14,11 +14,11 @@ import { Label } from "~/components/ui/label"
 import { Spinner } from "~/components/ui/spinner"
 import { Text } from "~/components/ui/text"
 import { Textarea } from "~/components/ui/textarea"
-import { findReview, REVIEW_COMPONENT_LABELS, type ReviewableSubject } from "../services/merchant-approval.mappers"
-import type { RevisionInput } from "../schemas/merchant-approval.schemas"
-import type { ApprovalReview, ReviewComponent } from "../types/merchant-approval.types"
+import { findReview, REVIEW_COMPONENT_LABELS, type ReviewableSubject } from "../../services/merchant-approval.mappers"
+import type { RevisionInput } from "../../schemas/merchant-approval.schemas"
+import type { ApprovalReview, ReviewComponent } from "../../types/merchant-approval.types"
 
-interface RevisionDialogProps {
+interface DetailRevisionDialogProps {
     open: boolean
     onOpenChange: (open: boolean) => void
     subjects: ReviewableSubject[]
@@ -31,14 +31,14 @@ function subjectKey(subject: ReviewableSubject): string {
     return `${subject.subjectType}:${subject.subjectId}`
 }
 
-export function RevisionDialog({
+export function DetailRevisionDialog({
     open,
     onOpenChange,
     subjects,
     reviews,
     isSubmitting,
     onConfirm,
-}: RevisionDialogProps) {
+}: DetailRevisionDialogProps) {
     const [note, setNote] = useState("")
     const [selection, setSelection] = useState<Record<string, string>>({})
     const [error, setError] = useState<string | null>(null)

@@ -13,8 +13,8 @@ import {
 import { Text } from "~/components/ui/text"
 import { formatDateTime } from "~/lib/format"
 import { cn } from "~/lib/utils"
-import { EVENT_TYPE_LABELS, eventActorLabel, REVIEW_COMPONENT_LABELS } from "../services/merchant-approval.mappers"
-import type { ApprovalEvent, ApprovalEventType, ReviewComponent } from "../types/merchant-approval.types"
+import { EVENT_TYPE_LABELS, eventActorLabel, REVIEW_COMPONENT_LABELS } from "../../services/merchant-approval.mappers"
+import type { ApprovalEvent, ApprovalEventType, ReviewComponent } from "../../types/merchant-approval.types"
 
 const EVENT_ICONS: Record<ApprovalEventType, LucideIcon> = {
     application_submitted: Send,
@@ -51,7 +51,7 @@ function metadataSummary(event: ApprovalEvent): string | null {
     return null
 }
 
-export function ApprovalTimeline({ events, currentUserId }: { events: ApprovalEvent[]; currentUserId?: string }) {
+export function DetailTimeline({ events, currentUserId }: { events: ApprovalEvent[]; currentUserId?: string }) {
     if (events.length === 0) {
         return (
             <Text variant="sm" className="text-muted-foreground">

@@ -2,8 +2,8 @@ import { useState } from "react"
 import { Badge } from "~/components/ui/badge"
 import { Text } from "~/components/ui/text"
 import { cn } from "~/lib/utils"
-import { MERCHANT_TYPE_LABELS } from "../services/merchant-approval.mappers"
-import type { MerchantSummary, MerchantType } from "../types/merchant-approval.types"
+import { MERCHANT_TYPE_LABELS } from "../../services/merchant-approval.mappers"
+import type { MerchantSummary, MerchantType } from "../../types/merchant-approval.types"
 import { Building, StoreIcon } from "lucide-react"
 
 function merchantInitials(name: string): string {
@@ -39,7 +39,7 @@ export function MerchantLogo({ logo, name, className }: { logo?: string | null; 
     )
 }
 
-export function ApprovalMerchantIdentity({ merchant }: { merchant: MerchantSummary | null }) {
+export function MerchantIdentity({ merchant }: { merchant: MerchantSummary | null }) {
     if (!merchant) {
         return (
             <Text variant="sm" className="text-muted-foreground">

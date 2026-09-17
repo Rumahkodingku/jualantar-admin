@@ -12,15 +12,15 @@ import { Text } from "~/components/ui/text"
 import { toast } from "~/components/ui/toast"
 import { ApiError } from "~/lib/api"
 import { useAuthSession, useHasPermission } from "~/modules/auth"
-import { ApprovalEmptyState } from "../components/approval-empty-state"
-import { ApprovalErrorState } from "../components/approval-error-state"
-import { ApprovalLoadingState } from "../components/approval-loading-state"
-import { ApprovalMobileCard } from "../components/approval-mobile-card"
-import { ApprovalPageHeader } from "../components/approval-page-header"
-import { ApprovalQueueToolbar } from "../components/approval-queue-toolbar"
-import { ApprovalStatusTabs } from "../components/approval-status-tabs"
-import { ApprovalSummary } from "../components/approval-summary"
-import { ApprovalTable } from "../components/approval-table"
+import { QueueEmptyState } from "../components/queue/queue-empty-state"
+import { QueueErrorState } from "../components/queue/queue-error-state"
+import { QueueLoadingState } from "../components/queue/queue-loading-state"
+import { QueueMobileCard } from "../components/queue/queue-mobile-card"
+import { QueuePageHeader } from "../components/queue/queue-page-header"
+import { QueueToolbar } from "../components/queue/queue-toolbar"
+import { QueueStatusTabs } from "../components/queue/queue-status-tabs"
+import { QueueSummary } from "../components/queue/queue-summary"
+import { QueueTable } from "../components/queue/queue-table"
 import { useClaimApproval } from "../services/merchant-approval.mutations"
 import { useApprovals } from "../services/merchant-approval.queries"
 import type {
@@ -118,17 +118,17 @@ export function MerchantApprovalListPage() {
 
     return (
         <div className="flex min-w-0 flex-1 flex-col gap-5 md:gap-6">
-            <ApprovalPageHeader
+            <QueuePageHeader
                 title="Antrean Merchant Approval"
                 description="Pantau dan proses pengajuan merchant dari satu antrean operasional."
             />
 
-            <ApprovalStatusTabs
+            <QueueStatusTabs
                 value={status}
                 onValueChange={(value) => updateParams({ status: value === "all" ? null : value })}
             />
 
-            <ApprovalQueueToolbar
+            <QueueToolbar
                 search={search}
                 assignedTo={assignedTo}
                 sortValue={`${sort}:${order}`}
@@ -143,18 +143,18 @@ export function MerchantApprovalListPage() {
             />
 
             {isLoading ? (
-                <ApprovalLoadingState />
+                <QueueLoadingState />
             ) : isError ? (
-                <ApprovalErrorState onRetry={() => refetch()} />
+                <QueueErrorState onRetry={() => refetch()} />
             ) : !data || data.items.length === 0 ? (
-                <ApprovalEmptyState
+                <QueueEmptyState
                     hasFilters={hasFilters}
                     onReset={() => updateParams({ search: null, status: null, assigned_to: null })}
                 />
             ) : (
                 <div className="flex min-w-0 flex-col gap-4">
                     <div className="hidden min-w-0 lg:block">
-                        <ApprovalTable
+                        <QueueTable
                             data={data.items}
                             currentUserId={currentUserId}
                             canClaim={canClaim}
@@ -165,7 +165,7 @@ export function MerchantApprovalListPage() {
 
                     <div className="flex flex-col gap-3 lg:hidden">
                         {data.items.map((item) => (
-                            <ApprovalMobileCard
+                            <QueueMobileCard
                                 key={item.id}
                                 item={item}
                                 currentUserId={currentUserId}

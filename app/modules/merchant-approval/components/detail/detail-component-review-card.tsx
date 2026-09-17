@@ -18,12 +18,16 @@ import { Spinner } from "~/components/ui/spinner"
 import { Text } from "~/components/ui/text"
 import { Textarea } from "~/components/ui/textarea"
 import { cn } from "~/lib/utils"
-import { REVIEW_COMPONENT_LABELS, subjectFields, type ReviewableSubject } from "../services/merchant-approval.mappers"
-import type { ApprovalReview, DocumentSubjectData } from "../types/merchant-approval.types"
-import { ReviewStatusBadge } from "./approval-status-badge"
-import { DocumentPreview } from "./document-preview"
+import {
+    REVIEW_COMPONENT_LABELS,
+    subjectFields,
+    type ReviewableSubject,
+} from "../../services/merchant-approval.mappers"
+import type { ApprovalReview, DocumentSubjectData } from "../../types/merchant-approval.types"
+import { ReviewStatusBadge } from "../shared/status-badge"
+import { DetailDocumentPreview } from "./detail-document-preview"
 
-interface ComponentReviewCardProps {
+interface DetailComponentReviewCardProps {
     subject: ReviewableSubject
     review?: ApprovalReview
     canReview: boolean
@@ -32,14 +36,14 @@ interface ComponentReviewCardProps {
     onReject: (note: string) => void
 }
 
-export function ComponentReviewCard({
+export function DetailComponentReviewCard({
     subject,
     review,
     canReview,
     isSubmitting,
     onVerify,
     onReject,
-}: ComponentReviewCardProps) {
+}: DetailComponentReviewCardProps) {
     const [note, setNote] = useState(review?.note ?? "")
     const [confirmOpen, setConfirmOpen] = useState(false)
 
@@ -72,7 +76,7 @@ export function ComponentReviewCard({
 
             <CardContent className="flex flex-col gap-4">
                 {isDocument ? (
-                    <DocumentPreview document={subject.data as unknown as DocumentSubjectData} />
+                    <DetailDocumentPreview document={subject.data as unknown as DocumentSubjectData} />
                 ) : (
                     <dl className="grid gap-3 sm:grid-cols-2">
                         {fields.map((field) => (

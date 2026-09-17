@@ -14,16 +14,16 @@ import {
 import { Field, FieldContent, FieldError, FieldLabel } from "~/components/ui/field"
 import { Spinner } from "~/components/ui/spinner"
 import { Textarea } from "~/components/ui/textarea"
-import { rejectionSchema, type RejectionInput } from "../schemas/merchant-approval.schemas"
+import { rejectionSchema, type RejectionInput } from "../../schemas/merchant-approval.schemas"
 
-interface RejectionDialogProps {
+interface DetailRejectionDialogProps {
     open: boolean
     onOpenChange: (open: boolean) => void
     isSubmitting: boolean
     onConfirm: (input: RejectionInput) => void
 }
 
-export function RejectionDialog({ open, onOpenChange, isSubmitting, onConfirm }: RejectionDialogProps) {
+export function DetailRejectionDialog({ open, onOpenChange, isSubmitting, onConfirm }: DetailRejectionDialogProps) {
     const {
         register,
         handleSubmit,

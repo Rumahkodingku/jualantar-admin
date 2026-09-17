@@ -4,13 +4,13 @@ import { Avatar, AvatarFallback } from "~/components/ui/avatar"
 import { Text } from "~/components/ui/text"
 import { cn } from "~/lib/utils"
 
-interface ApprovalReviewerProps {
+interface ReviewerProps {
     assignedTo: string | null
     currentUserId?: string
     className?: string
 }
 
-export function ApprovalReviewer({ assignedTo, currentUserId, className }: ApprovalReviewerProps) {
+export function Reviewer({ assignedTo, currentUserId, className }: ReviewerProps) {
     const isAssigned = Boolean(assignedTo)
     const isSelf = Boolean(assignedTo && currentUserId && assignedTo === currentUserId)
     const label = !isAssigned ? "Belum Ditugaskan" : isSelf ? "Anda" : "Administrator"

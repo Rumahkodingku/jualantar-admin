@@ -11,13 +11,13 @@ import { toast } from "~/components/ui/toast"
 import { ApiError } from "~/lib/api"
 import { cn } from "~/lib/utils"
 import { useAuthSession, useHasPermission } from "~/modules/auth"
-import type { RejectionInput, RevisionInput } from "../schemas/merchant-approval.schemas"
+import type { RejectionInput, RevisionInput } from "../../schemas/merchant-approval.schemas"
 import {
     collectReviewableSubjects,
     findReview,
     summarizeReviewProgress,
     type ReviewableSubject,
-} from "../services/merchant-approval.mappers"
+} from "../../services/merchant-approval.mappers"
 import {
     useApproveApplication,
     useClaimApproval,
@@ -25,18 +25,18 @@ import {
     useReleaseApproval,
     useRequestRevision,
     useReviewComponent,
-} from "../services/merchant-approval.mutations"
-import type { ApprovalDetail } from "../types/merchant-approval.types"
-import { MerchantLogo, MerchantTypeBadge, ServiceBadge } from "./approval-merchant"
-import { ApprovalReviewer } from "./approval-reviewer"
-import { ApplicationStatusBadge } from "./approval-status-badge"
-import { ApprovalConfirmDialog } from "./approval-confirm-dialog"
-import { ApprovalTimeline } from "./approval-timeline"
-import { ComponentReviewCard } from "./component-review-card"
-import { RejectionDialog } from "./rejection-dialog"
-import { RevisionDialog } from "./revision-dialog"
-import { RevisionHistory } from "./revision-history"
-import { SnapshotSections } from "./snapshot-sections"
+} from "../../services/merchant-approval.mutations"
+import type { ApprovalDetail } from "../../types/merchant-approval.types"
+import { MerchantLogo, MerchantTypeBadge, ServiceBadge } from "../shared/merchant"
+import { Reviewer } from "../shared/reviewer"
+import { ApplicationStatusBadge } from "../shared/status-badge"
+import { DetailConfirmDialog } from "./detail-confirm-dialog"
+import { DetailTimeline } from "./detail-timeline"
+import { DetailComponentReviewCard } from "./detail-component-review-card"
+import { DetailRejectionDialog } from "./detail-rejection-dialog"
+import { DetailRevisionDialog } from "./detail-revision-dialog"
+import { DetailRevisionHistory } from "./detail-revision-history"
+import { DetailSnapshotSections } from "./detail-snapshot-sections"
 
 function subjectKey(subject: ReviewableSubject): string {
     return `${subject.subjectType}:${subject.subjectId}`
@@ -67,7 +67,7 @@ function ProgressChip({ label, className, dot }: { label: string; className: str
     )
 }
 
-export function ApprovalDetailView({ approval }: { approval: ApprovalDetail }) {
+export function DetailView({ approval }: { approval: ApprovalDetail }) {
     const { data: session } = useAuthSession()
     const currentUserId = session?.id
 
@@ -279,7 +279,7 @@ export function ApprovalDetailView({ approval }: { approval: ApprovalDetail }) {
                                 Reviewer
                             </Text>
                             <div className="mt-1">
-                                <ApprovalReviewer assignedTo={approval.assigned_to} currentUserId={currentUserId} />
+                                <Reviewer assignedTo={approval.assigned_to} currentUserId={currentUserId} />
                             </div>
                         </div>
                     </div>
@@ -384,7 +384,7 @@ export function ApprovalDetailView({ approval }: { approval: ApprovalDetail }) {
 
                 <TabsContent value="data">
                     {approval.current_snapshot ? (
-                        <SnapshotSections snapshot={approval.current_snapshot.data} />
+                        <DetailSnapshotSections snapshot={approval.current_snapshot.data} />
                     ) : (
                         <Text variant="sm" className="text-muted-foreground">
                             Snapshot pengajuan tidak tersedia.
@@ -396,7 +396,7 @@ export function ApprovalDetailView({ approval }: { approval: ApprovalDetail }) {
                     {subjects.length > 0 ? (
                         <div className="grid gap-4 xl:grid-cols-2">
                             {subjects.map((subject) => (
-                                <ComponentReviewCard
+                                <DetailComponentReviewCard
                                     key={subjectKey(subject)}
                                     subject={subject}
                                     review={findReview(approval.reviews, subject.subjectType, subject.subjectId)}
@@ -415,15 +415,15 @@ export function ApprovalDetailView({ approval }: { approval: ApprovalDetail }) {
                 </TabsContent>
 
                 <TabsContent value="revisions">
-                    <RevisionHistory revisions={approval.revisions} currentUserId={currentUserId} />
+                    <DetailRevisionHistory revisions={approval.revisions} currentUserId={currentUserId} />
                 </TabsContent>
 
                 <TabsContent value="timeline">
-                    <ApprovalTimeline events={approval.events} currentUserId={currentUserId} />
+                    <DetailTimeline events={approval.events} currentUserId={currentUserId} />
                 </TabsContent>
             </Tabs>
 
-            <RevisionDialog
+            <DetailRevisionDialog
                 open={revisionOpen}
                 onOpenChange={setRevisionOpen}
                 subjects={subjects}
@@ -432,14 +432,14 @@ export function ApprovalDetailView({ approval }: { approval: ApprovalDetail }) {
                 onConfirm={handleRevision}
             />
 
-            <RejectionDialog
+            <DetailRejectionDialog
                 open={rejectOpen}
                 onOpenChange={setRejectOpen}
                 isSubmitting={reject.isPending}
                 onConfirm={handleReject}
             />
 
-            <ApprovalConfirmDialog
+            <DetailConfirmDialog
                 open={releaseOpen}
                 onOpenChange={setReleaseOpen}
                 title="Lepas review ini?"
@@ -449,7 +449,7 @@ export function ApprovalDetailView({ approval }: { approval: ApprovalDetail }) {
                 onConfirm={handleRelease}
             />
 
-            <ApprovalConfirmDialog
+            <DetailConfirmDialog
                 open={approveOpen}
                 onOpenChange={setApproveOpen}
                 title="Setujui pengajuan ini?"
@@ -492,7 +492,7 @@ export function ApprovalDetailView({ approval }: { approval: ApprovalDetail }) {
                         </div>
                     )}
                 </div>
-            </ApprovalConfirmDialog>
+            </DetailConfirmDialog>
         </div>
     )
 }

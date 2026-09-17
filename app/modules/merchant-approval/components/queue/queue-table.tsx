@@ -1,11 +1,11 @@
 import { Table, TableBody, TableHead, TableHeader, TableRow } from "~/components/ui/table"
 import { Text } from "~/components/ui/text"
-import type { ApprovalListItem } from "../types/merchant-approval.types"
-import { ApprovalTableRow } from "./approval-table-row"
+import type { ApprovalListItem } from "../../types/merchant-approval.types"
+import { QueueTableRow } from "./queue-table-row"
 
 const COLUMNS = ["Merchant", "Pengajuan", "Tipe", "Layanan", "Status", "Tanggal Pengajuan", "Reviewer"] as const
 
-interface ApprovalTableProps {
+interface QueueTableProps {
     data: ApprovalListItem[]
     currentUserId?: string
     canClaim: (item: ApprovalListItem) => boolean
@@ -13,7 +13,7 @@ interface ApprovalTableProps {
     claimingId: string | null
 }
 
-export function ApprovalTable({ data, currentUserId, canClaim, onClaim, claimingId }: ApprovalTableProps) {
+export function QueueTable({ data, currentUserId, canClaim, onClaim, claimingId }: QueueTableProps) {
     return (
         <div className="scrollbar-thumb-rounded scrollbar-thin w-full max-w-full min-w-0">
             <Table className="w-full min-w-275">
@@ -42,7 +42,7 @@ export function ApprovalTable({ data, currentUserId, canClaim, onClaim, claiming
 
                 <TableBody>
                     {data.map((item) => (
-                        <ApprovalTableRow
+                        <QueueTableRow
                             key={item.id}
                             item={item}
                             currentUserId={currentUserId}

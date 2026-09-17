@@ -18,7 +18,7 @@ const SORT_ITEMS: Record<string, string> = {
     "completed_at:desc": "Terakhir diselesaikan",
 }
 
-interface ApprovalFilterProps {
+interface QueueFilterProps {
     search: string
     assignedTo: string
     sortValue: string
@@ -27,14 +27,14 @@ interface ApprovalFilterProps {
     onSortChange: (value: string) => void
 }
 
-export function ApprovalFilter({
+export function QueueFilter({
     search,
     assignedTo,
     sortValue,
     onSearchChange,
     onAssignedChange,
     onSortChange,
-}: ApprovalFilterProps) {
+}: QueueFilterProps) {
     const [searchValue, setSearchValue] = useState(search)
 
     useEffect(() => {

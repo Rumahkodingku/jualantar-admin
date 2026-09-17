@@ -13,7 +13,7 @@ import { Button } from "~/components/ui/button"
 import { Skeleton } from "~/components/ui/skeleton"
 import { Text } from "~/components/ui/text"
 import { ApiError } from "~/lib/api"
-import { ApprovalDetailView } from "../components/approval-detail"
+import { DetailView } from "../components/detail/detail-view"
 import { useApproval } from "../services/merchant-approval.queries"
 
 function DetailSkeleton() {
@@ -93,7 +93,7 @@ export function MerchantApprovalDetailPage() {
                     </div>
                 </div>
             ) : data ? (
-                <ApprovalDetailView approval={data} />
+                <DetailView approval={data} />
             ) : null}
         </div>
     )
