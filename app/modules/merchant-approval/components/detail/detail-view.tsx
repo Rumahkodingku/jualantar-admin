@@ -1,11 +1,9 @@
-import { Check, ClipboardCheck, Inbox, PencilLine, Undo2, X } from "lucide-react"
-import { useState } from "react"
+import { Calendar, Check, Copy, Hash, Image, Inbox, MapPin, UserRound, Utensils } from "lucide-react"
+import { useMemo, useState } from "react"
 
 import { Button } from "~/components/ui/button"
-import { Card, CardContent, CardHeader } from "~/components/ui/card"
+import { Card, CardContent } from "~/components/ui/card"
 import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "~/components/ui/empty"
-import { Progress } from "~/components/ui/progress"
-import { Spinner } from "~/components/ui/spinner"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs"
 import { Text } from "~/components/ui/text"
 import { toast } from "~/components/ui/toast"
@@ -21,7 +19,6 @@ import {
 } from "../../services/merchant-approval.mappers"
 import {
     useApproveApplication,
-    useClaimApproval,
     useRejectApplication,
     useReleaseApproval,
     useRequestRevision,
@@ -38,6 +35,9 @@ import { DetailRejectionDialog } from "./detail-rejection-dialog"
 import { DetailRevisionDialog } from "./detail-revision-dialog"
 import { DetailRevisionHistory } from "./detail-revision-history"
 import { DetailSnapshotSections } from "./detail-snapshot-sections"
+import { formatDate, formatDateTime, formatRelativeDate } from "~/lib/format"
+import { PageHeader } from "~/components/page-header"
+import { ApprovalTimeline, ApprovalTimelineItem, type ApprovalStatus, type ApprovalStep } from "./approval-timeline"
 
 function subjectKey(subject: ReviewableSubject): string {
     return `${subject.subjectType}:${subject.subjectId}`
@@ -54,31 +54,42 @@ function errorMessage(error: unknown, fallback: string): string {
     return fallback
 }
 
-function ProgressChip({ label, className, dot }: { label: string; className: string; dot: string }) {
-    return (
-        <span
-            className={cn(
-                "inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-xs font-medium whitespace-nowrap",
-                className
-            )}
-        >
-            <span className={cn("size-1.5 shrink-0 rounded-full", dot)} aria-hidden="true" />
-            {label}
-        </span>
-    )
-}
+// function ApprovalTimelineItem({ title, date, completed }: { title: string; date: string; completed: boolean }) {
+//     return (
+//         <div className="flex items-start gap-3 sm:flex-col sm:items-center sm:gap-0 sm:text-center">
+//             <span
+//                 aria-hidden="true"
+//                 className={cn(
+//                     "relative z-10 flex size-6 shrink-0 items-center justify-center rounded-full border-2 sm:mx-auto",
+//                     completed
+//                         ? "border-emerald-500 bg-emerald-500 text-white"
+//                         : "border-emerald-500/40 bg-background text-transparent"
+//                 )}
+//             >
+//                 {completed && <Check aria-hidden="true" className="size-3.5" />}
+//             </span>
+//             <div className="flex min-w-0 flex-col sm:mt-2">
+//                 <Text
+//                     variant="xs"
+//                     weight="bold"
+//                     className={completed ? "text-emerald-700 dark:text-emerald-400" : "text-muted-foreground"}
+//                 >
+//                     {title}
+//                 </Text>
+//                 <Text variant="xs" weight="medium" className="mt-1 text-muted-foreground">
+//                     {date}
+//                 </Text>
+//             </div>
+//         </div>
+//     )
+// }
 
 export function DetailView({ approval }: { approval: ApprovalDetail }) {
     const { data: session } = useAuthSession()
     const currentUserId = session?.id
 
-    const canClaimPermission = useHasPermission("merchant.approval.claim")
     const canReviewPermission = useHasPermission("merchant.approval.review")
-    const canRevisionPermission = useHasPermission("merchant.approval.revision")
-    const canRejectPermission = useHasPermission("merchant.approval.reject")
-    const canApprovePermission = useHasPermission("merchant.approval.approve")
 
-    const claim = useClaimApproval()
     const release = useReleaseApproval()
     const review = useReviewComponent()
     const revision = useRequestRevision()
@@ -92,20 +103,13 @@ export function DetailView({ approval }: { approval: ApprovalDetail }) {
     const [reviewingKey, setReviewingKey] = useState<string | null>(null)
 
     const status = approval.application.status
-    const isPending = status === "pending"
     const isInReview = status === "in_review"
     const isAssignedToMe = Boolean(currentUserId && approval.assigned_to === currentUserId)
 
-    const canClaim = canClaimPermission && isPending && !approval.assigned_to
-    const canRelease = canClaimPermission && isInReview && isAssignedToMe
     const canReview = canReviewPermission && isInReview && isAssignedToMe
-    const canRevision = canRevisionPermission && isInReview && isAssignedToMe
-    const canReject = canRejectPermission && isInReview && isAssignedToMe
-    const canApprove = canApprovePermission && isInReview && isAssignedToMe
 
     const subjects = collectReviewableSubjects(approval.current_snapshot?.data ?? null)
     const progress = summarizeReviewProgress(subjects, approval.reviews)
-    const progressPercent = progress.total > 0 ? Math.round((progress.verified / progress.total) * 100) : 0
     const unresolvedSubjects = subjects.filter((subject) => {
         const reviewItem = findReview(approval.reviews, subject.subjectType, subject.subjectId)
         return reviewItem?.status !== "verified"
@@ -113,22 +117,44 @@ export function DetailView({ approval }: { approval: ApprovalDetail }) {
 
     const merchantLogo = approval.current_snapshot?.data.subjects.merchant?.data.logo_url ?? approval.merchant.logo
     const merchantType = approval.current_snapshot?.data.merchant_type ?? approval.merchant.type
+    const merchantDescription = approval.current_snapshot?.data.subjects.merchant?.data.description ?? null
+    const merchantAddress =
+        approval.current_snapshot?.data.subjects.merchant_outlet[0]?.data.address ??
+        approval.current_snapshot?.data.subjects.legal_entity?.data.address ??
+        null
+    const merchantPhoto = approval.current_snapshot?.data.subjects.merchant_outlet[0]?.data.photos_url?.[0] ?? null
 
-    const handleClaim = () => {
-        claim.mutate(approval.id, {
-            onSuccess: () =>
-                toast.add({
-                    title: "Review diklaim",
-                    description: "Anda sekarang menjadi reviewer pengajuan ini.",
-                    type: "success",
-                }),
-            onError: (error) =>
-                toast.add({
-                    title: "Gagal mengklaim",
-                    description: errorMessage(error, "Terjadi kesalahan."),
-                    type: "error",
-                }),
+    const timelineSteps = useMemo<ApprovalStep[]>(() => {
+        const isRejected = status === "rejected"
+
+        const raw = [
+            { title: "Pengajuan", at: approval.application.created_at, done: true },
+            { title: "Review Diklaim", at: approval.assigned_at, done: Boolean(approval.assigned_at) },
+            { title: "Komponen Direview", at: approval.started_at, done: progress.verified > 0 },
+            {
+                title: isRejected ? "Pengajuan Ditolak" : "Pengajuan Disetujui",
+                at: approval.completed_at,
+                done: status === "approved",
+            },
+        ]
+
+        // Tahap pertama yang belum selesai adalah tahap yang sedang berjalan
+        const activeIndex = raw.findIndex((step) => !step.done)
+
+        return raw.map((step, index) => {
+            let stepStatus: ApprovalStatus = step.done ? "completed" : "upcoming"
+            if (index === activeIndex) stepStatus = isRejected ? "rejected" : "current"
+
+            return {
+                title: step.title,
+                date: step.at ? formatDateTime(step.at) : stepStatus === "current" ? "Menunggu" : "—",
+                status: stepStatus,
+            }
         })
+    }, [approval, progress.verified, status])
+
+    const handleViewPhoto = () => {
+        if (merchantPhoto) window.open(merchantPhoto, "_blank", "noopener,noreferrer")
     }
 
     const handleRelease = () => {
@@ -239,129 +265,242 @@ export function DetailView({ approval }: { approval: ApprovalDetail }) {
 
     return (
         <div className="flex min-w-0 flex-1 flex-col gap-5 md:gap-6">
-           
+            <div className="flex items-end justify-between">
+                <PageHeader
+                    isBack
+                    title="Detail Pengajuan Merchant"
+                    description="Lihat detail informasi, dokumen, dan lakukan proses verifikasi pengajuan merchant"
+                    breadcrumbs={[
+                        { label: "Home", to: "/dashboard" },
+                        { label: "Merchant Approvals", to: "/merchant-approvals" },
+                        { label: "Approval" },
+                        { label: approval.application.application_number || "Detail" },
+                    ]}
+                />
 
-            <Card className="min-w-0 overflow-hidden">
-                <CardHeader className="gap-4">
-                    <div className="flex flex-wrap items-start justify-between gap-4">
-                        <div className="flex min-w-0 items-start gap-3">
-                            <MerchantLogo
-                                logo={merchantLogo}
-                                name={approval.merchant.business_name}
-                                className="size-12 rounded-xl text-sm"
-                            />
-                            <div className="min-w-0">
-                                <Text as="h1" variant="xl" weight="bold" truncate className="text-foreground">
-                                    {approval.merchant.business_name}
-                                </Text>
-                                <div className="mt-1.5 flex flex-wrap items-center gap-2">
-                                    <Text variant="xs" className="font-mono text-muted-foreground">
-                                        {approval.merchant.slug}
-                                    </Text>
-                                    <MerchantTypeBadge type={merchantType} />
-                                    <ServiceBadge name={approval.merchant.service?.name} />
+                <ApplicationStatusBadge status={status} />
+            </div>
+
+            {/* Section Summary */}
+            <Card className="overflow-hidden">
+                <CardContent className="p-0">
+                    {/* Top Section */}
+                    <div className="px-6">
+                        <MerchantLogo
+                            logo={merchantLogo}
+                            name={approval.merchant.business_name}
+                            className="size-14 shrink-0 rounded-xl text-sm"
+                        />
+                        <div className="flex flex-col gap-5 xl:flex-row xl:items-start xl:justify-between">
+                            {/* Merchant Information */}
+                            <div className="min-w-0 flex-1">
+                                <div className="flex min-w-0 items-start gap-3">
+                                    <div className="min-w-0 flex-1">
+                                        {/* Name + Status */}
+                                        <div className="flex flex-wrap items-center gap-2">
+                                            <Text
+                                                as="h1"
+                                                variant="xl"
+                                                weight="bold"
+                                                className="truncate text-foreground"
+                                            >
+                                                {approval.merchant.business_name}
+                                            </Text>
+                                        </div>
+
+                                        {/* Slug + Merchant Type + Service */}
+                                        <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
+                                            <Text variant="xs" className="font-mono text-muted-foreground">
+                                                {approval.merchant.slug}
+                                            </Text>
+
+                                            <span className="text-muted-foreground/40">-</span>
+
+                                            <MerchantTypeBadge type={merchantType} />
+
+                                            <span className="text-muted-foreground/40">-</span>
+
+                                            <ServiceBadge
+                                                name={approval?.current_snapshot?.data?.subjects?.service?.data?.name}
+                                            />
+                                        </div>
+
+                                        {/* Merchant Description / Address */}
+                                        <div className="mt-2 space-y-1">
+                                            {merchantDescription && (
+                                                <Text variant="xs" className="text-muted-foreground">
+                                                    {merchantDescription}
+                                                </Text>
+                                            )}
+
+                                            {merchantAddress && (
+                                                <div className="mt-6 flex items-center gap-1.5">
+                                                    <MapPin
+                                                        aria-hidden="true"
+                                                        className="size-3.5 shrink-0 text-muted-foreground"
+                                                    />
+
+                                                    <Text variant="xs" className="truncate text-muted-foreground">
+                                                        {merchantAddress}
+                                                    </Text>
+                                                </div>
+                                            )}
+                                        </div>
+
+                                        {/* Application Metadata */}
+                                        <div className="mt-5 grid grid-cols-2 gap-x-5 gap-y-4 sm:grid-cols-4">
+                                            {/* Application Number */}
+                                            <div className="min-w-0">
+                                                <Text variant="xs" className="text-muted-foreground">
+                                                    No. Pengajuan
+                                                </Text>
+
+                                                <div className="mt-1 flex min-w-0 items-center gap-1.5">
+                                                    {/* <div className="flex size-7 shrink-0 items-center justify-center rounded-md bg-muted">
+                                                        <Hash
+                                                            aria-hidden="true"
+                                                            className="size-3.5 text-muted-foreground"
+                                                        />
+                                                    </div> */}
+
+                                                    <Text
+                                                        variant="xs"
+                                                        weight="semibold"
+                                                        className="truncate text-foreground"
+                                                    >
+                                                        {approval.application.application_number}
+                                                    </Text>
+
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="icon-xs"
+                                                        className="size-5 shrink-0"
+                                                        onClick={() =>
+                                                            navigator.clipboard.writeText(
+                                                                approval.application.application_number
+                                                            )
+                                                        }
+                                                        aria-label="Salin nomor pengajuan"
+                                                    >
+                                                        <Copy aria-hidden="true" className="size-3" />
+                                                    </Button>
+                                                </div>
+                                            </div>
+
+                                            {/* Service */}
+                                            <div className="min-w-0">
+                                                <Text variant="xs" className="text-muted-foreground">
+                                                    Layanan
+                                                </Text>
+
+                                                <div className="mt-1 flex items-center gap-2">
+                                                    {/* <div className="flex size-7 shrink-0 items-center justify-center rounded-md bg-muted">
+                                                        <Utensils
+                                                            aria-hidden="true"
+                                                            className="size-3.5 text-muted-foreground"
+                                                        />
+                                                    </div> */}
+
+                                                    <Text
+                                                        variant="xs"
+                                                        weight="semibold"
+                                                        className="truncate text-foreground"
+                                                    >
+                                                        {
+                                                            approval?.current_snapshot?.data?.subjects?.service?.data
+                                                                ?.name
+                                                        }
+                                                    </Text>
+                                                </div>
+                                            </div>
+
+                                            {/* Application Date */}
+                                            <div className="min-w-0">
+                                                <Text variant="xs" className="text-muted-foreground">
+                                                    Tanggal Pengajuan
+                                                </Text>
+
+                                                <div className="mt-1 flex items-start gap-2">
+                                                    {/* <div className="flex size-7 shrink-0 items-center justify-center rounded-md bg-muted">
+                                                        <Calendar
+                                                            aria-hidden="true"
+                                                            className="size-3.5 text-muted-foreground"
+                                                        />
+                                                    </div> */}
+
+                                                    <div className="flex min-w-0 flex-col">
+                                                        <Text
+                                                            variant="xs"
+                                                            weight="semibold"
+                                                            className="truncate text-foreground"
+                                                        >
+                                                            {formatDateTime(approval.application.created_at)}
+                                                        </Text>
+
+                                                        <Text
+                                                            variant="xs"
+                                                            className="mt-1 text-muted-foreground italic"
+                                                        >
+                                                            {formatRelativeDate(approval.application.created_at)}
+                                                        </Text>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            {/* Reviewer */}
+                                            <div className="min-w-0">
+                                                <Text variant="xs" className="text-muted-foreground">
+                                                    Reviewer
+                                                </Text>
+
+                                                <div className="mt-1 flex items-center gap-2">
+                                                    <div className="min-w-0">
+                                                        <div className="truncate">
+                                                            <Reviewer
+                                                                assignedTo={approval.assigned_to}
+                                                                currentUserId={currentUserId}
+                                                            />
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                        <ApplicationStatusBadge status={status} />
-                    </div>
-                </CardHeader>
 
-                <CardContent className="flex flex-col gap-4">
-                    <div className="grid gap-4 sm:grid-cols-2">
-                        <div className="min-w-0">
-                            <Text variant="xs" className="text-muted-foreground">
-                                No. Pengajuan
-                            </Text>
-                            <Text variant="sm" weight="medium" className="mt-0.5 font-mono text-foreground">
-                                {approval.application.application_number}
-                            </Text>
-                        </div>
-                        <div className="min-w-0">
-                            <Text variant="xs" className="text-muted-foreground">
-                                Reviewer
-                            </Text>
-                            <div className="mt-1">
-                                <Reviewer assignedTo={approval.assigned_to} currentUserId={currentUserId} />
+                            {/* Merchant Photo */}
+                            <div className="relative w-full shrink-0 overflow-hidden rounded-xl border border-border/60 bg-muted sm:h-44 xl:w-72">
+                                {merchantPhoto ? (
+                                    <img
+                                        src={merchantPhoto}
+                                        alt={`Foto ${approval.merchant.business_name}`}
+                                        className="h-full w-full object-cover"
+                                    />
+                                ) : (
+                                    <div className="flex h-full min-h-40 items-center justify-center text-sm text-muted-foreground">
+                                        Tidak ada foto
+                                    </div>
+                                )}
+
+                                <Button
+                                    variant="secondary"
+                                    size="sm"
+                                    className="absolute right-2.5 bottom-2.5 gap-1.5 bg-background/95 shadow-sm backdrop-blur-sm hover:bg-background"
+                                    onClick={handleViewPhoto}
+                                >
+                                    <Image aria-hidden="true" className="size-3.5" />
+                                    Lihat Foto
+                                </Button>
                             </div>
                         </div>
                     </div>
 
-                    <div className="rounded-lg border border-border p-3">
-                        <div className="flex flex-wrap items-center justify-between gap-2">
-                            <Text variant="xs" weight="medium" className="text-muted-foreground">
-                                Progress Review
-                            </Text>
-                            <Text variant="xs" weight="semibold" className="text-foreground tabular-nums">
-                                {progress.verified} / {progress.total} terverifikasi
-                            </Text>
+                    {/* Approval Timeline */}
+                    <div className="mt-6 px-4 pb-4 sm:px-5 sm:pb-5 lg:px-6 lg:pb-6">
+                        <div className="rounded-xl border border-emerald-100 bg-emerald-50/70 p-4 sm:p-5 dark:border-emerald-900/40 dark:bg-emerald-950/20">
+                            <ApprovalTimeline steps={timelineSteps} label="Status pengajuan" className="w-full" />
                         </div>
-                        <Progress value={progressPercent} className="mt-2" />
-                        <div className="mt-3 flex flex-wrap gap-2">
-                            <ProgressChip
-                                label={`${progress.verified} terverifikasi`}
-                                className="bg-emerald-500/10 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-400"
-                                dot="bg-emerald-500"
-                            />
-                            <ProgressChip
-                                label={`${progress.rejected} ditolak`}
-                                className="bg-red-500/10 text-red-700 dark:bg-red-500/15 dark:text-red-400"
-                                dot="bg-red-500"
-                            />
-                            <ProgressChip
-                                label={`${progress.pending} belum`}
-                                className="bg-muted text-muted-foreground"
-                                dot="bg-muted-foreground/70"
-                            />
-                        </div>
-                    </div>
-
-                    {approval.decision_reason && (
-                        <div className="rounded-lg bg-muted/40 p-3">
-                            <Text variant="xs" className="text-muted-foreground">
-                                Alasan keputusan
-                            </Text>
-                            <Text variant="sm" className="mt-0.5 text-foreground">
-                                {approval.decision_reason}
-                            </Text>
-                        </div>
-                    )}
-
-                    <div className="flex flex-wrap gap-2">
-                        {canClaim && (
-                            <Button onClick={handleClaim} disabled={claim.isPending}>
-                                {claim.isPending ? (
-                                    <Spinner aria-hidden="true" />
-                                ) : (
-                                    <ClipboardCheck aria-hidden="true" />
-                                )}
-                                Klaim Review
-                            </Button>
-                        )}
-                        {canRelease && (
-                            <Button variant="outline" onClick={() => setReleaseOpen(true)}>
-                                <Undo2 aria-hidden="true" />
-                                Lepas Review
-                            </Button>
-                        )}
-                        {canRevision && (
-                            <Button variant="outline" onClick={() => setRevisionOpen(true)}>
-                                <PencilLine aria-hidden="true" />
-                                Minta Revisi
-                            </Button>
-                        )}
-                        {canReject && (
-                            <Button variant="destructive" onClick={() => setRejectOpen(true)}>
-                                <X aria-hidden="true" />
-                                Tolak
-                            </Button>
-                        )}
-                        {canApprove && (
-                            <Button onClick={() => setApproveOpen(true)}>
-                                <Check aria-hidden="true" />
-                                Setujui
-                            </Button>
-                        )}
                     </div>
                 </CardContent>
             </Card>
@@ -482,7 +621,7 @@ export function DetailView({ approval }: { approval: ApprovalDetail }) {
                         <Text variant="xs" className="text-muted-foreground">
                             No. Pengajuan
                         </Text>
-                        <Text variant="sm" className="font-mono text-foreground">
+                        <Text variant="sm" className="text-foreground">
                             {approval.application.application_number}
                         </Text>
                     </div>

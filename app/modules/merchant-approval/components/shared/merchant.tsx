@@ -19,7 +19,7 @@ export function MerchantLogo({ logo, name, className }: { logo?: string | null; 
     return (
         <span
             className={cn(
-                "flex size-9 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-muted text-xs font-semibold text-muted-foreground ring-1 ring-border",
+                "flex size-9 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-muted text-xs font-semibold text-muted-foreground",
                 className
             )}
         >

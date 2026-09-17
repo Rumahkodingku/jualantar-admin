@@ -177,6 +177,7 @@ export interface OutletSubjectData {
     service_radius_km: string | null
     operating_hours: unknown
     photos: string[]
+    photos_url?: (string | null)[]
     status: string
     geography?: SubjectGeography | null
 }

@@ -30,20 +30,6 @@ export function MerchantApprovalDetailPage() {
 
     return (
         <div className="flex min-w-0 flex-1 flex-col gap-5 md:gap-6">
-            <div>
-                <PageHeader
-                    isBack
-                    title="Detail Pengajuan Merchant"
-                    description="Lihat detail informasi, dokumen, dan lakukan proses verifikasi pengajuan merchant"
-                    breadcrumbs={[
-                        { label: "Home", to: "/dashboard" },
-                        { label: "Merchant Approvals", to: "/merchant-approvals" },
-                        { label: "Approval" },
-                        { label: data?.application?.application_number || "Detail" },
-                    ]}
-                />
-            </div>
-
             {isLoading ? (
                 <DetailSkeleton />
             ) : isError ? (
