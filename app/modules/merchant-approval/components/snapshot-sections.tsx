@@ -1,7 +1,7 @@
 import type { ReactNode } from "react"
 import { cn } from "~/lib/utils"
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/components/ui/card"
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "~/components/ui/accordion"
 import { Text } from "~/components/ui/text"
 import { formatDate } from "~/lib/format"
 import {
@@ -14,15 +14,33 @@ import {
 import type { ApplicationSnapshotData } from "../types/merchant-approval.types"
 import { DocumentPreview } from "./document-preview"
 
-function DetailSection({ title, description, children }: { title: string; description?: string; children: ReactNode }) {
+function SnapshotSection({
+    value,
+    title,
+    description,
+    children,
+}: {
+    value: string
+    title: string
+    description?: string
+    children: ReactNode
+}) {
     return (
-        <Card className="min-w-0 overflow-hidden">
-            <CardHeader>
-                <CardTitle>{title}</CardTitle>
-                {description && <CardDescription>{description}</CardDescription>}
-            </CardHeader>
-            <CardContent>{children}</CardContent>
-        </Card>
+        <AccordionItem value={value} className="rounded-xl border border-border bg-card px-4 not-last:border-b">
+            <AccordionTrigger className="py-3.5 hover:no-underline">
+                <div className="min-w-0">
+                    <Text variant="sm" weight="semibold" className="text-foreground">
+                        {title}
+                    </Text>
+                    {description && (
+                        <Text variant="xs" className="mt-0.5 text-muted-foreground">
+                            {description}
+                        </Text>
+                    )}
+                </div>
+            </AccordionTrigger>
+            <AccordionContent>{children}</AccordionContent>
+        </AccordionItem>
     )
 }
 
@@ -59,8 +77,8 @@ export function SnapshotSections({ snapshot }: { snapshot: ApplicationSnapshotDa
     const service = subjects.service?.data
 
     return (
-        <div className="flex flex-col gap-4">
-            <DetailSection title="Bisnis">
+        <Accordion multiple defaultValue={["business"]} className="gap-3">
+            <SnapshotSection value="business" title="Bisnis">
                 {business ? (
                     <FieldGrid>
                         <DetailItem label="Nama Bisnis" value={business.business_name} />
@@ -76,9 +94,9 @@ export function SnapshotSections({ snapshot }: { snapshot: ApplicationSnapshotDa
                 ) : (
                     <EmptyText>Data bisnis tidak tersedia.</EmptyText>
                 )}
-            </DetailSection>
+            </SnapshotSection>
 
-            <DetailSection title="Identitas Pemilik">
+            <SnapshotSection value="identity" title="Identitas Pemilik">
                 {identity ? (
                     <FieldGrid>
                         <DetailItem label="Nama Lengkap" value={identity.full_name} />
@@ -92,9 +110,9 @@ export function SnapshotSections({ snapshot }: { snapshot: ApplicationSnapshotDa
                 ) : (
                     <EmptyText>Data identitas tidak tersedia.</EmptyText>
                 )}
-            </DetailSection>
+            </SnapshotSection>
 
-            <DetailSection title="Badan Hukum">
+            <SnapshotSection value="legal_entity" title="Badan Hukum">
                 {legalEntity ? (
                     <FieldGrid>
                         <DetailItem label="Nama Badan Hukum" value={legalEntity.name} />
@@ -113,9 +131,9 @@ export function SnapshotSections({ snapshot }: { snapshot: ApplicationSnapshotDa
                 ) : (
                     <EmptyText>Tidak ada badan hukum (merchant perorangan).</EmptyText>
                 )}
-            </DetailSection>
+            </SnapshotSection>
 
-            <DetailSection title="Layanan">
+            <SnapshotSection value="service" title="Layanan">
                 {service ? (
                     <FieldGrid>
                         <DetailItem label="Nama Layanan" value={service.name} />
@@ -124,9 +142,13 @@ export function SnapshotSections({ snapshot }: { snapshot: ApplicationSnapshotDa
                 ) : (
                     <EmptyText>Data layanan tidak tersedia.</EmptyText>
                 )}
-            </DetailSection>
+            </SnapshotSection>
 
-            <DetailSection title="Kategori" description={`${subjects.merchant_category.length} kategori terdaftar`}>
+            <SnapshotSection
+                value="category"
+                title="Kategori"
+                description={`${subjects.merchant_category.length} kategori terdaftar`}
+            >
                 {subjects.merchant_category.length > 0 ? (
                     <ul className="flex flex-col gap-2">
                         {subjects.merchant_category.map((category, index) => (
@@ -134,7 +156,7 @@ export function SnapshotSections({ snapshot }: { snapshot: ApplicationSnapshotDa
                                 key={category.subject_id}
                                 className="flex items-center justify-between gap-3 rounded-lg bg-muted/40 px-3 py-2"
                             >
-                                <Text variant="sm" className="truncate text-foreground">
+                                <Text variant="sm" truncate className="text-foreground">
                                     {category.data.name ?? category.data.slug ?? `Kategori ${index + 1}`}
                                 </Text>
                                 <Text variant="xs" className="shrink-0 text-muted-foreground">
@@ -146,9 +168,13 @@ export function SnapshotSections({ snapshot }: { snapshot: ApplicationSnapshotDa
                 ) : (
                     <EmptyText>Belum ada kategori.</EmptyText>
                 )}
-            </DetailSection>
+            </SnapshotSection>
 
-            <DetailSection title="Outlet" description={`${subjects.merchant_outlet.length} outlet aktif`}>
+            <SnapshotSection
+                value="outlet"
+                title="Outlet"
+                description={`${subjects.merchant_outlet.length} outlet aktif`}
+            >
                 {subjects.merchant_outlet.length > 0 ? (
                     <div className="flex flex-col gap-3">
                         {subjects.merchant_outlet.map((outlet) => (
@@ -187,9 +213,13 @@ export function SnapshotSections({ snapshot }: { snapshot: ApplicationSnapshotDa
                 ) : (
                     <EmptyText>Belum ada outlet.</EmptyText>
                 )}
-            </DetailSection>
+            </SnapshotSection>
 
-            <DetailSection title="Dokumen" description={`${subjects.merchant_document.length} dokumen diunggah`}>
+            <SnapshotSection
+                value="document"
+                title="Dokumen"
+                description={`${subjects.merchant_document.length} dokumen diunggah`}
+            >
                 {subjects.merchant_document.length > 0 ? (
                     <div className="flex flex-col gap-2">
                         {subjects.merchant_document.map((document) => (
@@ -199,9 +229,13 @@ export function SnapshotSections({ snapshot }: { snapshot: ApplicationSnapshotDa
                 ) : (
                     <EmptyText>Belum ada dokumen.</EmptyText>
                 )}
-            </DetailSection>
+            </SnapshotSection>
 
-            <DetailSection title="Pencairan Dana" description={`${subjects.payout_account.length} rekening terdaftar`}>
+            <SnapshotSection
+                value="payout"
+                title="Pencairan Dana"
+                description={`${subjects.payout_account.length} rekening terdaftar`}
+            >
                 {subjects.payout_account.length > 0 ? (
                     <div className="flex flex-col gap-3">
                         {subjects.payout_account.map((account) => (
@@ -221,7 +255,7 @@ export function SnapshotSections({ snapshot }: { snapshot: ApplicationSnapshotDa
                 ) : (
                     <EmptyText>Belum ada rekening pencairan.</EmptyText>
                 )}
-            </DetailSection>
-        </div>
+            </SnapshotSection>
+        </Accordion>
     )
 }

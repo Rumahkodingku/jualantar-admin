@@ -58,7 +58,12 @@ export interface MerchantSummary {
     business_name: string
     slug: string
     type: MerchantType | null
-    service: { id: string; name: string; slug: string } | null
+    logo?: string | null
+    service: {
+        id: string
+        name: string
+        slug: string
+    } | null
 }
 
 export interface MerchantApplication {

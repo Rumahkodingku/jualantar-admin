@@ -17,6 +17,7 @@ import { Label } from "~/components/ui/label"
 import { Spinner } from "~/components/ui/spinner"
 import { Text } from "~/components/ui/text"
 import { Textarea } from "~/components/ui/textarea"
+import { cn } from "~/lib/utils"
 import { REVIEW_COMPONENT_LABELS, subjectFields, type ReviewableSubject } from "../services/merchant-approval.mappers"
 import type { ApprovalReview, DocumentSubjectData } from "../types/merchant-approval.types"
 import { ReviewStatusBadge } from "./approval-status-badge"
@@ -44,11 +45,21 @@ export function ComponentReviewCard({
 
     const fields = subjectFields(subject.component, subject.data)
     const isDocument = subject.component === "document"
+    const reviewStatus = review?.status ?? "pending"
 
     const noteId = `review-note-${subject.subjectId}`
 
     return (
-        <Card className="min-w-0 overflow-hidden">
+        <Card
+            className={cn(
+                "min-w-0 overflow-hidden border-l-4",
+                reviewStatus === "verified"
+                    ? "border-l-emerald-500"
+                    : reviewStatus === "rejected"
+                      ? "border-l-red-500"
+                      : "border-l-muted-foreground/30"
+            )}
+        >
             <CardHeader className="flex-row items-start justify-between gap-3">
                 <div className="min-w-0">
                     <Text variant="xs" className="font-medium tracking-wide text-muted-foreground uppercase">
@@ -56,7 +67,7 @@ export function ComponentReviewCard({
                     </Text>
                     <CardTitle className="mt-0.5 truncate">{subject.label}</CardTitle>
                 </div>
-                <ReviewStatusBadge status={review?.status ?? "pending"} />
+                <ReviewStatusBadge status={reviewStatus} />
             </CardHeader>
 
             <CardContent className="flex flex-col gap-4">

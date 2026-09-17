@@ -1,5 +1,4 @@
 import { api } from "~/lib/api"
-
 import type { RejectionInput, RevisionInput, ReviewInput } from "../schemas/merchant-approval.schemas"
 import type {
     ApprovalActionResult,
@@ -12,20 +11,7 @@ import type {
     ApprovalListParams,
     PaginatedApprovals,
 } from "../types/merchant-approval.types"
-
-interface DataEnvelope<T> {
-    data: T
-}
-
-interface PaginatedEnvelope<T> {
-    data: T[]
-    meta: {
-        current_page: number
-        per_page: number
-        total: number
-        last_page: number
-    }
-}
+import type { DataEnvelope, PaginatedEnvelope } from "~/types/types"
 
 const BASE_PATH = "/admin/merchant-approvals"
 
@@ -36,8 +22,13 @@ export const merchantApprovalApi = {
     },
 
     async getApprovals(params: ApprovalListParams): Promise<PaginatedApprovals> {
-        const { data } = await api.get<PaginatedEnvelope<ApprovalListItem>>(BASE_PATH, { params })
-        return { items: data.data, meta: data.meta }
+        const { data } = await api.get<PaginatedEnvelope<ApprovalListItem>>(BASE_PATH, {
+            params,
+        })
+        return {
+            items: data.data,
+            meta: data.meta,
+        }
     },
 
     async getApproval(id: string): Promise<ApprovalDetail> {

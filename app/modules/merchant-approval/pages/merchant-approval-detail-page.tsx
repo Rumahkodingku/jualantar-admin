@@ -1,6 +1,14 @@
 import { ArrowLeft } from "lucide-react"
 import { Link, useParams } from "react-router"
 
+import {
+    Breadcrumb,
+    BreadcrumbItem,
+    BreadcrumbLink,
+    BreadcrumbList,
+    BreadcrumbPage,
+    BreadcrumbSeparator,
+} from "~/components/ui/breadcrumb"
 import { Button } from "~/components/ui/button"
 import { Skeleton } from "~/components/ui/skeleton"
 import { Text } from "~/components/ui/text"
@@ -29,16 +37,38 @@ export function MerchantApprovalDetailPage() {
 
     return (
         <div className="flex min-w-0 flex-1 flex-col gap-5 md:gap-6">
-            <Button
-                variant="ghost"
-                size="sm"
-                className="w-fit"
-                nativeButton={false}
-                render={<Link to="/merchant-approvals/queue" />}
-            >
-                <ArrowLeft aria-hidden="true" />
-                Kembali ke Antrean
-            </Button>
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
+                <Button
+                    variant="ghost"
+                    size="sm"
+                    className="w-fit"
+                    nativeButton={false}
+                    render={<Link to="/merchant-approvals/queue" />}
+                >
+                    <ArrowLeft aria-hidden="true" />
+                    Kembali
+                </Button>
+
+                <Breadcrumb>
+                    <BreadcrumbList>
+                        <BreadcrumbItem>
+                            <BreadcrumbLink render={<Link to="/dashboard" />}>Home</BreadcrumbLink>
+                        </BreadcrumbItem>
+                        <BreadcrumbSeparator />
+                        <BreadcrumbItem>
+                            <BreadcrumbLink render={<Link to="/merchant-approvals" />}>Merchant</BreadcrumbLink>
+                        </BreadcrumbItem>
+                        <BreadcrumbSeparator />
+                        <BreadcrumbItem>
+                            <BreadcrumbLink render={<Link to="/merchant-approvals/queue" />}>Approval</BreadcrumbLink>
+                        </BreadcrumbItem>
+                        <BreadcrumbSeparator />
+                        <BreadcrumbItem>
+                            <BreadcrumbPage>{data?.application.application_number ?? "Detail"}</BreadcrumbPage>
+                        </BreadcrumbItem>
+                    </BreadcrumbList>
+                </Breadcrumb>
+            </div>
 
             {isLoading ? (
                 <DetailSkeleton />

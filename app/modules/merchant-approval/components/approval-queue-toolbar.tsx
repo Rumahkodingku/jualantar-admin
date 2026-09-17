@@ -1,25 +1,8 @@
-import { RotateCw, Search } from "lucide-react"
-import { useEffect, useState } from "react"
+import { RotateCw } from "lucide-react"
 
 import { Button } from "~/components/ui/button"
-import { Input } from "~/components/ui/input"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "~/components/ui/select"
 import { Spinner } from "~/components/ui/spinner"
-
-const SEARCH_DEBOUNCE_MS = 400
-
-const ASSIGNED_ITEMS: Record<string, string> = {
-    all: "Semua Reviewer",
-    me: "Ditugaskan ke Saya",
-    unassigned: "Belum Ditugaskan",
-}
-
-const SORT_ITEMS: Record<string, string> = {
-    "created_at:desc": "Pengajuan terbaru",
-    "created_at:asc": "Pengajuan terlama",
-    "assigned_at:desc": "Terakhir diklaim",
-    "completed_at:desc": "Terakhir diselesaikan",
-}
+import { ApprovalFilter } from "./approval-filter"
 
 interface ApprovalQueueToolbarProps {
     search: string
@@ -42,72 +25,32 @@ export function ApprovalQueueToolbar({
     onRefresh,
     isRefreshing,
 }: ApprovalQueueToolbarProps) {
-    const [searchValue, setSearchValue] = useState(search)
-
-    useEffect(() => {
-        setSearchValue(search)
-    }, [search])
-
-    useEffect(() => {
-        if (searchValue === search) return
-
-        const timer = setTimeout(() => onSearchChange(searchValue), SEARCH_DEBOUNCE_MS)
-        return () => clearTimeout(timer)
-    }, [searchValue, search, onSearchChange])
-
     return (
-        <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-            <div className="relative w-full lg:max-w-xs">
-                <Search
-                    aria-hidden="true"
-                    className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground"
-                />
-                <Input
-                    type="search"
-                    value={searchValue}
-                    onChange={(event) => setSearchValue(event.target.value)}
-                    placeholder="Cari nama bisnis atau no. pengajuan..."
-                    aria-label="Cari pengajuan"
-                    className="pl-9"
+        <div className="flex w-full flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            {/* Filters */}
+            <div className="min-w-0 flex-1">
+                <ApprovalFilter
+                    search={search}
+                    assignedTo={assignedTo}
+                    sortValue={sortValue}
+                    onSearchChange={onSearchChange}
+                    onAssignedChange={onAssignedChange}
+                    onSortChange={onSortChange}
                 />
             </div>
 
-            <div className="flex flex-wrap items-center gap-2">
-                <Select
-                    items={ASSIGNED_ITEMS}
-                    value={assignedTo}
-                    onValueChange={(value) => onAssignedChange(String(value))}
-                >
-                    <SelectTrigger size="sm" className="w-42.5" aria-label="Filter reviewer">
-                        <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                        {Object.entries(ASSIGNED_ITEMS).map(([value, label]) => (
-                            <SelectItem key={value} value={value}>
-                                {label}
-                            </SelectItem>
-                        ))}
-                    </SelectContent>
-                </Select>
-
-                <Select items={SORT_ITEMS} value={sortValue} onValueChange={(value) => onSortChange(String(value))}>
-                    <SelectTrigger size="sm" className="w-45" aria-label="Urutkan">
-                        <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                        {Object.entries(SORT_ITEMS).map(([value, label]) => (
-                            <SelectItem key={value} value={value}>
-                                {label}
-                            </SelectItem>
-                        ))}
-                    </SelectContent>
-                </Select>
-
-                <Button type="button" variant="outline" size="sm" onClick={onRefresh} disabled={isRefreshing}>
-                    {isRefreshing ? <Spinner aria-hidden="true" /> : <RotateCw aria-hidden="true" />}
-                    Muat ulang
-                </Button>
-            </div>
+            {/* Refresh */}
+            <Button
+                type="button"
+                variant="default"
+                size="lg"
+                onClick={onRefresh}
+                disabled={isRefreshing}
+                className="w-full shrink-0 sm:w-auto"
+            >
+                {isRefreshing ? <Spinner aria-hidden="true" /> : <RotateCw aria-hidden="true" />}
+                Muat ulang
+            </Button>
         </div>
     )
 }

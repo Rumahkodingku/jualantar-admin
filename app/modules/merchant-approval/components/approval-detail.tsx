@@ -2,12 +2,14 @@ import { Check, ClipboardCheck, PencilLine, Undo2, X } from "lucide-react"
 import { useState } from "react"
 
 import { Button } from "~/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/components/ui/card"
+import { Card, CardContent, CardHeader } from "~/components/ui/card"
+import { Progress } from "~/components/ui/progress"
 import { Spinner } from "~/components/ui/spinner"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs"
 import { Text } from "~/components/ui/text"
 import { toast } from "~/components/ui/toast"
 import { ApiError } from "~/lib/api"
+import { cn } from "~/lib/utils"
 import { useAuthSession, useHasPermission } from "~/modules/auth"
 import type { RejectionInput, RevisionInput } from "../schemas/merchant-approval.schemas"
 import {
@@ -25,6 +27,8 @@ import {
     useReviewComponent,
 } from "../services/merchant-approval.mutations"
 import type { ApprovalDetail } from "../types/merchant-approval.types"
+import { MerchantLogo, MerchantTypeBadge, ServiceBadge } from "./approval-merchant"
+import { ApprovalReviewer } from "./approval-reviewer"
 import { ApplicationStatusBadge } from "./approval-status-badge"
 import { ApprovalConfirmDialog } from "./approval-confirm-dialog"
 import { ApprovalTimeline } from "./approval-timeline"
@@ -47,6 +51,20 @@ function errorMessage(error: unknown, fallback: string): string {
         return error.message || fallback
     }
     return fallback
+}
+
+function ProgressChip({ label, className, dot }: { label: string; className: string; dot: string }) {
+    return (
+        <span
+            className={cn(
+                "inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-xs font-medium whitespace-nowrap",
+                className
+            )}
+        >
+            <span className={cn("size-1.5 shrink-0 rounded-full", dot)} aria-hidden="true" />
+            {label}
+        </span>
+    )
 }
 
 export function ApprovalDetailView({ approval }: { approval: ApprovalDetail }) {
@@ -86,12 +104,14 @@ export function ApprovalDetailView({ approval }: { approval: ApprovalDetail }) {
 
     const subjects = collectReviewableSubjects(approval.current_snapshot?.data ?? null)
     const progress = summarizeReviewProgress(subjects, approval.reviews)
+    const progressPercent = progress.total > 0 ? Math.round((progress.verified / progress.total) * 100) : 0
     const unresolvedSubjects = subjects.filter((subject) => {
         const reviewItem = findReview(approval.reviews, subject.subjectType, subject.subjectId)
         return reviewItem?.status !== "verified"
     })
 
-    const reviewerLabel = approval.assigned_to ? (isAssignedToMe ? "Anda" : "Administrator") : "Belum ditugaskan"
+    const merchantLogo = approval.current_snapshot?.data.subjects.merchant?.data.logo_url ?? approval.merchant.logo
+    const merchantType = approval.current_snapshot?.data.merchant_type ?? approval.merchant.type
 
     const handleClaim = () => {
         claim.mutate(approval.id, {
@@ -219,44 +239,77 @@ export function ApprovalDetailView({ approval }: { approval: ApprovalDetail }) {
     return (
         <div className="flex min-w-0 flex-1 flex-col gap-5 md:gap-6">
             <Card className="min-w-0 overflow-hidden">
-                <CardHeader className="gap-3">
-                    <div className="flex flex-wrap items-start justify-between gap-3">
-                        <div className="flex min-w-0 items-center gap-3">
-                            {approval.current_snapshot?.data.subjects.merchant?.data.logo_url && (
-                                <img
-                                    src={approval.current_snapshot.data.subjects.merchant.data.logo_url}
-                                    alt=""
-                                    className="size-11 shrink-0 rounded-lg object-cover ring-1 ring-border"
-                                />
-                            )}
+                <CardHeader className="gap-4">
+                    <div className="flex flex-wrap items-start justify-between gap-4">
+                        <div className="flex min-w-0 items-start gap-3">
+                            <MerchantLogo
+                                logo={merchantLogo}
+                                name={approval.merchant.business_name}
+                                className="size-12 rounded-xl text-sm"
+                            />
                             <div className="min-w-0">
-                                <CardTitle className="text-xl">{approval.merchant.business_name}</CardTitle>
-                                <CardDescription className="mt-1 font-mono">
-                                    {approval.application.application_number}
-                                </CardDescription>
+                                <Text as="h1" variant="xl" weight="bold" truncate className="text-foreground">
+                                    {approval.merchant.business_name}
+                                </Text>
+                                <div className="mt-1.5 flex flex-wrap items-center gap-2">
+                                    <Text variant="xs" className="font-mono text-muted-foreground">
+                                        {approval.merchant.slug}
+                                    </Text>
+                                    <MerchantTypeBadge type={merchantType} />
+                                    <ServiceBadge name={approval.merchant.service?.name} />
+                                </div>
                             </div>
                         </div>
                         <ApplicationStatusBadge status={status} />
                     </div>
                 </CardHeader>
+
                 <CardContent className="flex flex-col gap-4">
-                    <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
-                        <div>
+                    <div className="grid gap-4 sm:grid-cols-2">
+                        <div className="min-w-0">
+                            <Text variant="xs" className="text-muted-foreground">
+                                No. Pengajuan
+                            </Text>
+                            <Text variant="sm" weight="medium" className="mt-0.5 font-mono text-foreground">
+                                {approval.application.application_number}
+                            </Text>
+                        </div>
+                        <div className="min-w-0">
                             <Text variant="xs" className="text-muted-foreground">
                                 Reviewer
                             </Text>
-                            <Text variant="sm" weight="medium" className="text-foreground">
-                                {reviewerLabel}
-                            </Text>
+                            <div className="mt-1">
+                                <ApprovalReviewer assignedTo={approval.assigned_to} currentUserId={currentUserId} />
+                            </div>
                         </div>
-                        <div>
-                            <Text variant="xs" className="text-muted-foreground">
+                    </div>
+
+                    <div className="rounded-lg border border-border p-3">
+                        <div className="flex flex-wrap items-center justify-between gap-2">
+                            <Text variant="xs" weight="medium" className="text-muted-foreground">
                                 Progress Review
                             </Text>
-                            <Text variant="sm" weight="medium" className="text-foreground">
-                                {progress.verified}/{progress.total} terverifikasi
-                                {progress.rejected > 0 ? ` · ${progress.rejected} ditolak` : ""}
+                            <Text variant="xs" weight="semibold" className="text-foreground tabular-nums">
+                                {progress.verified} / {progress.total} terverifikasi
                             </Text>
+                        </div>
+                        <Progress value={progressPercent} className="mt-2" />
+                        <div className="mt-3 flex flex-wrap gap-2">
+                            <ProgressChip
+                                label={`${progress.verified} terverifikasi`}
+                                className="bg-emerald-500/10 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-400"
+                                dot="bg-emerald-500"
+                            />
+                            <ProgressChip
+                                label={`${progress.rejected} ditolak`}
+                                className="bg-red-500/10 text-red-700 dark:bg-red-500/15 dark:text-red-400"
+                                dot="bg-red-500"
+                            />
+                            <ProgressChip
+                                label={`${progress.pending} belum`}
+                                className="bg-muted text-muted-foreground"
+                                dot="bg-muted-foreground/70"
+                            />
                         </div>
                     </div>
 
@@ -310,12 +363,20 @@ export function ApprovalDetailView({ approval }: { approval: ApprovalDetail }) {
                 </CardContent>
             </Card>
 
-            <Tabs defaultValue="data">
-                <TabsList variant="line" className="mb-4">
-                    <TabsTrigger value="data">Data Merchant</TabsTrigger>
-                    <TabsTrigger value="review">Review Komponen</TabsTrigger>
-                    <TabsTrigger value="revisions">Riwayat Revisi</TabsTrigger>
-                    <TabsTrigger value="timeline">Timeline</TabsTrigger>
+            <Tabs defaultValue="data" className="min-w-0">
+                <TabsList variant="line" className="mb-4 w-full max-w-full justify-start overflow-x-auto pb-1.5">
+                    <TabsTrigger value="data" className="shrink-0">
+                        Data Merchant
+                    </TabsTrigger>
+                    <TabsTrigger value="review" className="shrink-0">
+                        Review Komponen
+                    </TabsTrigger>
+                    <TabsTrigger value="revisions" className="shrink-0">
+                        Riwayat Revisi
+                    </TabsTrigger>
+                    <TabsTrigger value="timeline" className="shrink-0">
+                        Timeline
+                    </TabsTrigger>
                 </TabsList>
 
                 <TabsContent value="data">

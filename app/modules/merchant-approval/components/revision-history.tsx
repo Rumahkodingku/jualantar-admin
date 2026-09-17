@@ -27,19 +27,23 @@ export function RevisionHistory({
 
     return (
         <div className="flex flex-col gap-3">
-            {revisions.map((revision) => (
+            {revisions.map((revision, index) => (
                 <div key={revision.id} className="rounded-xl border border-border bg-card p-4">
                     <div className="flex flex-wrap items-center justify-between gap-2">
                         <div className="flex items-center gap-2">
-                            <RevisionStatusBadge status={revision.status} />
-                            <Text variant="xs" className="text-muted-foreground">
-                                {formatDateTime(revision.requested_at)}
+                            <Text variant="sm" weight="semibold" className="text-foreground">
+                                Revisi #{index + 1}
                             </Text>
+                            <RevisionStatusBadge status={revision.status} />
                         </div>
                         <Text variant="xs" className="text-muted-foreground">
-                            Diminta oleh {requesterLabel(revision.requested_by, currentUserId)}
+                            {formatDateTime(revision.requested_at)}
                         </Text>
                     </div>
+
+                    <Text variant="xs" className="mt-1 text-muted-foreground">
+                        Diminta oleh {requesterLabel(revision.requested_by, currentUserId)}
+                    </Text>
 
                     {revision.note && (
                         <Text variant="sm" className="mt-3 text-foreground">

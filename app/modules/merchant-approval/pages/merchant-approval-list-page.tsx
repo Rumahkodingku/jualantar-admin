@@ -1,9 +1,6 @@
-import { ClipboardList, Inbox } from "lucide-react"
 import { useCallback, useState } from "react"
 import { useSearchParams } from "react-router"
 
-import { Button } from "~/components/ui/button"
-import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "~/components/ui/empty"
 import {
     Pagination,
     PaginationContent,
@@ -11,13 +8,18 @@ import {
     PaginationNext,
     PaginationPrevious,
 } from "~/components/ui/pagination"
-import { Skeleton } from "~/components/ui/skeleton"
 import { Text } from "~/components/ui/text"
 import { toast } from "~/components/ui/toast"
 import { ApiError } from "~/lib/api"
-import { useHasPermission } from "~/modules/auth"
+import { useAuthSession, useHasPermission } from "~/modules/auth"
+import { ApprovalEmptyState } from "../components/approval-empty-state"
+import { ApprovalErrorState } from "../components/approval-error-state"
+import { ApprovalLoadingState } from "../components/approval-loading-state"
+import { ApprovalMobileCard } from "../components/approval-mobile-card"
+import { ApprovalPageHeader } from "../components/approval-page-header"
 import { ApprovalQueueToolbar } from "../components/approval-queue-toolbar"
 import { ApprovalStatusTabs } from "../components/approval-status-tabs"
+import { ApprovalSummary } from "../components/approval-summary"
 import { ApprovalTable } from "../components/approval-table"
 import { useClaimApproval } from "../services/merchant-approval.mutations"
 import { useApprovals } from "../services/merchant-approval.queries"
@@ -28,21 +30,14 @@ import type {
     ApplicationStatus,
     SortOrder,
 } from "../types/merchant-approval.types"
+import { cn } from "cn"
 
 const DEFAULT_PER_PAGE = 15
 
-function TableSkeleton() {
-    return (
-        <div className="flex flex-col gap-2" aria-busy="true" aria-label="Memuat antrean">
-            {Array.from({ length: 6 }).map((_, index) => (
-                <Skeleton key={index} className="h-10 w-full rounded-lg" />
-            ))}
-        </div>
-    )
-}
-
 export function MerchantApprovalListPage() {
     const [searchParams, setSearchParams] = useSearchParams()
+    const { data: session } = useAuthSession()
+    const currentUserId = session?.id
     const canClaimPermission = useHasPermission("merchant.approval.claim")
     const claim = useClaimApproval()
 
@@ -116,20 +111,22 @@ export function MerchantApprovalListPage() {
         [canClaimPermission]
     )
 
+    const hasFilters = Boolean(search) || status !== "all" || assignedTo !== "all"
     const meta = data?.meta
     const canGoPrevious = page > 1
     const canGoNext = meta ? page < meta.last_page : false
 
     return (
         <div className="flex min-w-0 flex-1 flex-col gap-5 md:gap-6">
-            <div className="min-w-0">
-                <Text as="h1" variant="2xl" weight="bold" className="tracking-tight text-foreground">
-                    Antrean Merchant Approval
-                </Text>
-                <Text variant="sm" className="mt-1.5 text-muted-foreground">
-                    Daftar pengajuan merchant yang perlu ditinjau.
-                </Text>
-            </div>
+            <ApprovalPageHeader
+                title="Antrean Merchant Approval"
+                description="Pantau dan proses pengajuan merchant dari satu antrean operasional."
+            />
+
+            <ApprovalStatusTabs
+                value={status}
+                onValueChange={(value) => updateParams({ status: value === "all" ? null : value })}
+            />
 
             <ApprovalQueueToolbar
                 search={search}
@@ -145,101 +142,97 @@ export function MerchantApprovalListPage() {
                 isRefreshing={isFetching && !isLoading}
             />
 
-            <ApprovalStatusTabs
-                value={status}
-                onValueChange={(value) => updateParams({ status: value === "all" ? null : value })}
-            />
-
             {isLoading ? (
-                <TableSkeleton />
+                <ApprovalLoadingState />
             ) : isError ? (
-                <div className="flex items-center justify-center rounded-xl border border-dashed border-border bg-card p-8">
-                    <div className="flex max-w-sm flex-col items-center gap-4 text-center">
-                        <div>
-                            <Text variant="base" weight="semibold" className="text-foreground">
-                                Antrean gagal dimuat.
-                            </Text>
-                            <Text variant="sm" className="mt-1 text-muted-foreground">
-                                Terjadi kesalahan saat memuat daftar pengajuan. Silakan coba lagi.
-                            </Text>
-                        </div>
-                        <Button variant="outline" onClick={() => refetch()}>
-                            Coba lagi
-                        </Button>
-                    </div>
-                </div>
+                <ApprovalErrorState onRetry={() => refetch()} />
             ) : !data || data.items.length === 0 ? (
-                <Empty className="border">
-                    <EmptyHeader>
-                        <EmptyMedia variant="icon">
-                            {search || status !== "all" || assignedTo !== "all" ? (
-                                <ClipboardList aria-hidden="true" />
-                            ) : (
-                                <Inbox aria-hidden="true" />
-                            )}
-                        </EmptyMedia>
-                        <EmptyTitle>Tidak ada pengajuan</EmptyTitle>
-                        <EmptyDescription>
-                            {search || status !== "all" || assignedTo !== "all"
-                                ? "Tidak ada pengajuan yang cocok dengan filter saat ini."
-                                : "Belum ada pengajuan merchant yang perlu ditinjau."}
-                        </EmptyDescription>
-                    </EmptyHeader>
-                    {(search || status !== "all" || assignedTo !== "all") && (
-                        <EmptyContent>
-                            <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => updateParams({ search: null, status: null, assigned_to: null })}
-                            >
-                                Reset filter
-                            </Button>
-                        </EmptyContent>
-                    )}
-                </Empty>
+                <ApprovalEmptyState
+                    hasFilters={hasFilters}
+                    onReset={() => updateParams({ search: null, status: null, assigned_to: null })}
+                />
             ) : (
-                <div className="flex flex-col gap-4">
-                    <ApprovalTable
-                        data={data.items}
-                        canClaim={canClaim}
-                        onClaim={handleClaim}
-                        claimingId={claimingId}
-                    />
+                <div className="flex min-w-0 flex-col gap-4">
+                    <div className="hidden min-w-0 lg:block">
+                        <ApprovalTable
+                            data={data.items}
+                            currentUserId={currentUserId}
+                            canClaim={canClaim}
+                            onClaim={handleClaim}
+                            claimingId={claimingId}
+                        />
+                    </div>
 
-                    <div className="flex flex-col items-center justify-between gap-3 sm:flex-row">
-                        <Text variant="xs" weight="semibold" className="text-muted-foreground">
-                            Menampilkan {data.items.length} dari {meta?.total ?? 0} pengajuan
+                    <div className="flex flex-col gap-3 lg:hidden">
+                        {data.items.map((item) => (
+                            <ApprovalMobileCard
+                                key={item.id}
+                                item={item}
+                                currentUserId={currentUserId}
+                                canClaim={canClaim(item)}
+                                isClaiming={claimingId === item.id}
+                                onClaim={handleClaim}
+                            />
+                        ))}
+                    </div>
+
+                    {/* Pagination */}
+                    <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                        <Text variant="xs" weight="medium" className="text-muted-foreground">
+                            Menampilkan <span className="font-semibold text-foreground">{data.items.length}</span> dari{" "}
+                            <span className="font-semibold text-foreground">{meta?.total ?? 0}</span> pengajuan
                         </Text>
 
-                        <Pagination className="mx-0 w-auto justify-end">
-                            <PaginationContent>
+                        <Pagination className="mx-0 w-auto justify-start sm:justify-end">
+                            <PaginationContent className="gap-1">
                                 <PaginationItem>
                                     <PaginationPrevious
                                         href="#"
                                         aria-disabled={!canGoPrevious}
-                                        className={
-                                            !canGoPrevious ? "pointer-events-none font-semibold opacity-50" : undefined
-                                        }
+                                        className={cn(
+                                            "h-8 rounded-md px-2.5 text-xs",
+                                            !canGoPrevious && "pointer-events-none opacity-40"
+                                        )}
                                         onClick={(event) => {
                                             event.preventDefault()
-                                            if (canGoPrevious) updateParams({ page: String(page - 1) }, false)
+
+                                            if (canGoPrevious) {
+                                                updateParams({ page: String(page - 1) }, false)
+                                            }
                                         }}
                                         text="Sebelumnya"
                                     />
                                 </PaginationItem>
+
                                 <PaginationItem>
-                                    <Text variant="xs" weight="semibold" className="px-2 text-muted-foreground">
-                                        Halaman {page} dari {meta?.last_page ?? 1}
-                                    </Text>
+                                    <div className="flex h-8 items-center px-3">
+                                        <Text
+                                            variant="xs"
+                                            weight="medium"
+                                            className="whitespace-nowrap text-muted-foreground"
+                                        >
+                                            Halaman <span className="font-semibold text-foreground">{page}</span> dari{" "}
+                                            <span className="font-semibold text-foreground">
+                                                {meta?.last_page ?? 1}
+                                            </span>
+                                        </Text>
+                                    </div>
                                 </PaginationItem>
+
                                 <PaginationItem>
                                     <PaginationNext
                                         href="#"
                                         aria-disabled={!canGoNext}
-                                        className={!canGoNext ? "pointer-events-none opacity-50" : undefined}
+                                        className={cn(
+                                            "h-8 rounded-md px-2.5 text-xs",
+                                            !canGoNext && "pointer-events-none opacity-40"
+                                        )}
                                         onClick={(event) => {
                                             event.preventDefault()
-                                            if (canGoNext) updateParams({ page: String(page + 1) }, false)
+
+                                            if (canGoNext) {
+                                                updateParams({ page: String(page + 1) }, false)
+                                            }
                                         }}
                                         text="Berikutnya"
                                     />

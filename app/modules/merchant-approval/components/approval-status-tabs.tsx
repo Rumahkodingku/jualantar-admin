@@ -1,6 +1,5 @@
 import { Badge } from "~/components/ui/badge"
 import { Tabs, TabsList, TabsTrigger } from "~/components/ui/tabs"
-
 import { useApprovalSummary } from "../services/merchant-approval.queries"
 
 const STATUS_TABS = [
@@ -28,8 +27,8 @@ export function ApprovalStatusTabs({ value, onValueChange }: ApprovalStatusTabsP
         : null
 
     return (
-        <Tabs value={value} onValueChange={(next) => onValueChange(String(next))}>
-            <TabsList variant="line" className="justify-start">
+        <Tabs value={value} onValueChange={(next) => onValueChange(String(next))} className="min-w-0">
+            <TabsList variant="line" className="w-full max-w-full justify-start gap-2 overflow-x-auto pb-1.5">
                 {STATUS_TABS.map((tab) => {
                     const count = counts?.[tab.value]
 
@@ -37,11 +36,14 @@ export function ApprovalStatusTabs({ value, onValueChange }: ApprovalStatusTabsP
                         <TabsTrigger
                             key={tab.value}
                             value={tab.value}
-                            className="text-xs font-semibold after:bg-primary! data-active:text-primary!"
+                            className="shrink-0 text-xs font-semibold after:bg-primary! data-active:text-primary!"
                         >
                             {tab.label}
                             {count !== undefined && (
-                                <Badge variant="destructive" className="h-4.5 px-1.5 text-[10px]">
+                                <Badge
+                                    variant="secondary"
+                                    className="h-4.5 min-w-4.5 px-1.5 text-[10px] font-semibold text-muted-foreground tabular-nums"
+                                >
                                     {count}
                                 </Badge>
                             )}

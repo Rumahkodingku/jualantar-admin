@@ -3,6 +3,8 @@
 @import "shadcn/tailwind.css";
 @import "@fontsource-variable/plus-jakarta-sans";
 
+@plugin "tailwind-scrollbar";
+
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
