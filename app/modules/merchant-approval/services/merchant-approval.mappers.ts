@@ -1,9 +1,11 @@
 import type {
     ApplicationSnapshotData,
+    ApplicationSnapshotSubjects,
     ApplicationStatus,
     ApprovalEvent,
     ApprovalEventType,
     ApprovalReview,
+    MerchantStatus,
     MerchantType,
     ReviewComponent,
     ReviewStatus,
@@ -85,6 +87,25 @@ export const REVISION_STATUS_META: Record<RevisionStatus, StatusMeta> = {
         label: "Dibatalkan",
         className: "bg-muted text-muted-foreground ring-border",
         dot: "bg-muted-foreground/70",
+    },
+}
+
+export const MERCHANT_STATUS_META: Record<MerchantStatus, StatusMeta> = {
+    inactive: {
+        label: "Nonaktif",
+        className: "bg-muted text-muted-foreground ring-border",
+        dot: "bg-muted-foreground/70",
+    },
+    active: {
+        label: "Aktif",
+        className:
+            "bg-emerald-500/10 text-emerald-700 ring-emerald-600/25 dark:bg-emerald-500/15 dark:text-emerald-400",
+        dot: "bg-emerald-500",
+    },
+    suspended: {
+        label: "Ditangguhkan",
+        className: "bg-red-500/10 text-red-700 ring-red-600/25 dark:bg-red-500/15 dark:text-red-400",
+        dot: "bg-red-500",
     },
 }
 
@@ -355,6 +376,77 @@ export function subjectFields(component: ReviewComponent, data: Record<string, u
         default:
             return []
     }
+}
+
+export type SnapshotSectionKey =
+    "business" | "identity" | "legal_entity" | "service" | "category" | "outlet" | "document" | "payout"
+
+export const SNAPSHOT_SECTION_BY_SUBJECT: Record<keyof ApplicationSnapshotSubjects, SnapshotSectionKey> = {
+    merchant: "business",
+    merchant_identity: "identity",
+    legal_entity: "legal_entity",
+    service: "service",
+    merchant_category: "category",
+    merchant_outlet: "outlet",
+    merchant_document: "document",
+    payout_account: "payout",
+}
+
+/** Enrichment-only fields that vary between requests (signed URLs, derived labels). */
+const ENRICHMENT_KEYS = new Set(["logo_url", "photos_url", "url", "geography"])
+
+function stripEnrichment(value: unknown): unknown {
+    if (Array.isArray(value)) return value.map(stripEnrichment)
+
+    if (value !== null && typeof value === "object") {
+        const result: Record<string, unknown> = {}
+
+        for (const [key, child] of Object.entries(value as Record<string, unknown>)) {
+            if (ENRICHMENT_KEYS.has(key)) continue
+            result[key] = stripEnrichment(child)
+        }
+
+        return result
+    }
+
+    return value
+}
+
+function normalizeSubjects(snapshot: ApplicationSnapshotData): Record<string, unknown> {
+    const normalized: Record<string, unknown> = {}
+
+    for (const [subjectType, entry] of Object.entries(snapshot.subjects)) {
+        if (entry === null || entry === undefined) continue
+
+        const list = Array.isArray(entry) ? entry : [entry]
+        normalized[subjectType] = Object.fromEntries(
+            list.map((subject) => [subject.subject_id, stripEnrichment(subject.data)])
+        )
+    }
+
+    return normalized
+}
+
+/**
+ * Compare two snapshot versions and return the section keys whose submitted
+ * data differs. Enrichment-only fields (temporary signed URLs, derived
+ * geography labels) are ignored so revisions are not falsely flagged.
+ */
+export function diffSnapshotSubjects(
+    previous: ApplicationSnapshotData,
+    current: ApplicationSnapshotData
+): Set<SnapshotSectionKey> {
+    const changed = new Set<SnapshotSectionKey>()
+    const prev = normalizeSubjects(previous)
+    const curr = normalizeSubjects(current)
+
+    for (const [subjectType, sectionKey] of Object.entries(SNAPSHOT_SECTION_BY_SUBJECT)) {
+        if (JSON.stringify(prev[subjectType]) !== JSON.stringify(curr[subjectType])) {
+            changed.add(sectionKey)
+        }
+    }
+
+    return changed
 }
 
 export function eventActorLabel(event: ApprovalEvent, currentUserId: string | undefined): string {

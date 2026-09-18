@@ -2,10 +2,16 @@ import { cn } from "~/lib/utils"
 
 import {
     APPLICATION_STATUS_META,
+    MERCHANT_STATUS_META,
     REVISION_STATUS_META,
     REVIEW_STATUS_META,
 } from "../../services/merchant-approval.mappers"
-import type { ApplicationStatus, RevisionStatus, ReviewStatus } from "../../types/merchant-approval.types"
+import type {
+    ApplicationStatus,
+    MerchantStatus,
+    RevisionStatus,
+    ReviewStatus,
+} from "../../types/merchant-approval.types"
 
 interface StatusPillProps {
     label: string
@@ -29,6 +35,10 @@ function StatusPill({ label, className, dot }: StatusPillProps) {
 
 export function ApplicationStatusBadge({ status }: { status: ApplicationStatus }) {
     return <StatusPill {...APPLICATION_STATUS_META[status]} />
+}
+
+export function MerchantStatusBadge({ status }: { status: MerchantStatus }) {
+    return <StatusPill {...MERCHANT_STATUS_META[status]} />
 }
 
 export function ReviewStatusBadge({ status }: { status: ReviewStatus }) {

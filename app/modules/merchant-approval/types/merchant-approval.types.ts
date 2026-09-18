@@ -32,6 +32,10 @@ export type RevisionStatus = (typeof REVISION_STATUSES)[number]
 
 export type ApprovalDecision = "approved" | "rejected"
 
+export const MERCHANT_STATUSES = ["inactive", "active", "suspended"] as const
+
+export type MerchantStatus = (typeof MERCHANT_STATUSES)[number]
+
 export type MerchantType = "individual" | "company"
 
 export const APPROVAL_EVENT_TYPES = [
@@ -278,7 +282,7 @@ export interface ApprovalDetailMerchant {
     business_name: string
     slug: string
     type: MerchantType | null
-    status: string
+    status: MerchantStatus
     service: { id: string; name: string; slug: string } | null
     owner: { id: string; email: string; phone: string | null } | null
     logo: string | null
@@ -297,6 +301,7 @@ export interface ApprovalDetail {
     decision: ApprovalDecision | null
     decision_reason: string | null
     current_snapshot: CurrentSnapshot | null
+    snapshots: CurrentSnapshot[]
     reviews: ApprovalReview[]
     revisions: ApprovalRevision[]
     events: ApprovalEvent[]

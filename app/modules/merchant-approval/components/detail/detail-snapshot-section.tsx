@@ -11,6 +11,7 @@ interface DetailSnapshotSectionProps {
     title: string
     description?: string
     guide?: string
+    badge?: string
     children: ReactNode
 }
 
@@ -20,6 +21,7 @@ export function DetailSnapshotSection({
     title,
     description,
     guide,
+    badge,
     children,
 }: DetailSnapshotSectionProps) {
     return (
@@ -41,6 +43,11 @@ export function DetailSnapshotSection({
                         </Text>
                     )}
                 </span>
+                {badge && (
+                    <span className="shrink-0 rounded-full bg-amber-500/10 px-2 py-0.5 text-[11px] font-semibold text-amber-700 dark:bg-amber-500/15 dark:text-amber-400">
+                        {badge}
+                    </span>
+                )}
             </AccordionTrigger>
             <AccordionContent className="px-6 pb-6">
                 {guide && (

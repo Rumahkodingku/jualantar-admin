@@ -1,4 +1,4 @@
-import { Component, Copy, Image, Inbox, MapPin, NotebookPen, Store, StoreIcon, Timeline } from "lucide-react"
+import { Component, Copy, Image, Inbox, Info, MapPin, NotebookPen, Store, StoreIcon, Timeline } from "lucide-react"
 import { useMemo, useState, type ReactNode } from "react"
 
 import { Button } from "~/components/ui/button"
@@ -12,9 +12,11 @@ import { useAuthSession, useHasPermission } from "~/modules/auth"
 import type { RejectionInput, RevisionInput } from "../../schemas/merchant-approval.schemas"
 import {
     collectReviewableSubjects,
+    diffSnapshotSubjects,
     findReview,
     summarizeReviewProgress,
     type ReviewableSubject,
+    type SnapshotSectionKey,
 } from "../../services/merchant-approval.mappers"
 import {
     useApproveApplication,
@@ -24,7 +26,7 @@ import {
     useRequestRevision,
     useReviewComponent,
 } from "../../services/merchant-approval.mutations"
-import type { ApprovalDetail } from "../../types/merchant-approval.types"
+import type { ApprovalDetail, CurrentSnapshot } from "../../types/merchant-approval.types"
 import { MerchantLogo, MerchantTypeBadge, ServiceBadge } from "../shared/merchant"
 import { Reviewer } from "../shared/reviewer"
 import { ApplicationStatusBadge } from "../shared/status-badge"
@@ -35,6 +37,7 @@ import { DetailRejectionDialog } from "./detail-rejection-dialog"
 import { DetailRevisionDialog } from "./detail-revision-dialog"
 import { DetailRevisionHistory } from "./detail-revision-history"
 import { DetailSnapshotSections } from "./detail-snapshot-sections"
+import { DetailSnapshotVersionSwitcher } from "./detail-snapshot-version-switcher"
 import { formatDateTime, formatRelativeDate } from "~/lib/format"
 import { PageHeader } from "~/components/page-header"
 import { ApprovalTimeline, type ApprovalStatus, type ApprovalStep } from "./approval-timeline"
@@ -86,6 +89,7 @@ export function DetailView({ approval }: { approval: ApprovalDetail }) {
     const [approveOpen, setApproveOpen] = useState(false)
     const [releaseOpen, setReleaseOpen] = useState(false)
     const [reviewingKey, setReviewingKey] = useState<string | null>(null)
+    const [selectedVersion, setSelectedVersion] = useState<number | null>(null)
 
     const status = approval.application.status
     const isPending = status === "pending"
@@ -114,6 +118,44 @@ export function DetailView({ approval }: { approval: ApprovalDetail }) {
         approval.current_snapshot?.data.subjects.legal_entity?.data.address ??
         null
     const merchantPhoto = approval.current_snapshot?.data.subjects.merchant_outlet[0]?.data.photos_url?.[0] ?? null
+
+    const snapshots = useMemo<CurrentSnapshot[]>(() => {
+        if (approval.snapshots && approval.snapshots.length > 0) return approval.snapshots
+
+        return approval.current_snapshot ? [approval.current_snapshot] : []
+    }, [approval])
+
+    const latestSnapshot = snapshots[0] ?? null
+    const activeVersion = selectedVersion ?? latestSnapshot?.version ?? null
+    const selectedSnapshot = snapshots.find((snapshot) => snapshot.version === activeVersion) ?? latestSnapshot
+
+    const changedSections = useMemo<Set<SnapshotSectionKey>>(() => {
+        if (!selectedSnapshot || !latestSnapshot || selectedSnapshot.version === latestSnapshot.version) {
+            return new Set()
+        }
+
+        return diffSnapshotSubjects(selectedSnapshot.data, latestSnapshot.data)
+    }, [selectedSnapshot, latestSnapshot])
+
+    const changedVersions = useMemo<Set<number>>(() => {
+        if (!latestSnapshot || snapshots.length <= 1) return new Set()
+
+        const versions = new Set<number>()
+
+        for (const snapshot of snapshots) {
+            if (
+                snapshot.version !== latestSnapshot.version &&
+                diffSnapshotSubjects(snapshot.data, latestSnapshot.data).size > 0
+            ) {
+                versions.add(snapshot.version)
+            }
+        }
+
+        return versions
+    }, [snapshots, latestSnapshot])
+
+    const serviceName =
+        approval.current_snapshot?.data?.subjects?.service?.data?.name ?? approval.merchant.service?.name ?? null
 
     const timelineSteps = useMemo<ApprovalStep[]>(() => {
         const isRejected = status === "rejected"
@@ -355,9 +397,7 @@ export function DetailView({ approval }: { approval: ApprovalDetail }) {
 
                                             <span className="text-muted-foreground/40">-</span>
 
-                                            <ServiceBadge
-                                                name={approval?.current_snapshot?.data?.subjects?.service?.data?.name}
-                                            />
+                                            <ServiceBadge name={serviceName} />
                                         </div>
 
                                         {/* Merchant Description / Address */}
@@ -441,10 +481,7 @@ export function DetailView({ approval }: { approval: ApprovalDetail }) {
                                                         weight="semibold"
                                                         className="truncate text-foreground"
                                                     >
-                                                        {
-                                                            approval?.current_snapshot?.data?.subjects?.service?.data
-                                                                ?.name
-                                                        }
+                                                        {serviceName}
                                                     </Text>
                                                 </div>
                                             </div>
@@ -583,8 +620,32 @@ export function DetailView({ approval }: { approval: ApprovalDetail }) {
 
                 <TabsContent value="data">
                     <DetailTabLayout sidebar={sidebar}>
-                        {approval.current_snapshot ? (
-                            <DetailSnapshotSections snapshot={approval.current_snapshot.data} />
+                        {selectedSnapshot ? (
+                            <div className="flex flex-col gap-4">
+                                {snapshots.length > 1 && (
+                                    <DetailSnapshotVersionSwitcher
+                                        snapshots={snapshots}
+                                        selectedVersion={selectedSnapshot.version}
+                                        changedVersions={changedVersions}
+                                        onSelect={setSelectedVersion}
+                                    />
+                                )}
+
+                                {selectedSnapshot.version !== latestSnapshot?.version && (
+                                    <div className="flex items-start gap-2 rounded-lg bg-muted/40 px-3 py-2">
+                                        <Info
+                                            aria-hidden="true"
+                                            className="mt-0.5 size-3.5 shrink-0 text-muted-foreground"
+                                        />
+                                        <Text variant="xs" className="text-muted-foreground">
+                                            Anda sedang melihat versi {selectedSnapshot.version}. Status review mengacu
+                                            pada versi terbaru (V{latestSnapshot?.version}).
+                                        </Text>
+                                    </div>
+                                )}
+
+                                <DetailSnapshotSections snapshot={selectedSnapshot.data} changed={changedSections} />
+                            </div>
                         ) : (
                             <Empty className="border">
                                 <EmptyHeader>

@@ -1,6 +1,5 @@
 import { Camera, MapPin } from "lucide-react"
 import type { ReactNode } from "react"
-
 import { Badge } from "~/components/ui/badge"
 import { Text } from "~/components/ui/text"
 import { cn } from "~/lib/utils"
@@ -16,14 +15,28 @@ function GroupLabel({ children }: { children: ReactNode }) {
     )
 }
 
+function coordinates(outlet: OutletSubjectData): { lat: number; lng: number } | null {
+    if (!outlet.latitude || !outlet.longitude) return null
+
+    const lat = Number(outlet.latitude)
+    const lng = Number(outlet.longitude)
+
+    if (!Number.isFinite(lat) || !Number.isFinite(lng) || lat < -90 || lat > 90 || lng < -180 || lng > 180) {
+        return null
+    }
+
+    return { lat, lng }
+}
+
 export function DetailOutletCard({ outlet }: { outlet: OutletSubjectData }) {
     const isActive = outlet.status === "active"
-    const hasCoords = Boolean(outlet.latitude && outlet.longitude)
+    const coords = coordinates(outlet)
+    const photos = outlet.photos_url?.filter((url): url is string => Boolean(url)) ?? []
 
     return (
         <div className="rounded-xl border border-border bg-card p-4">
             <div className="flex flex-wrap items-center justify-between gap-2">
-                <Text variant="sm" weight="semibold" className="min-w-0 text-foreground">
+                <Text variant="sm" weight="bold" className="min-w-0 text-foreground">
                     {outlet.name}
                 </Text>
                 <Badge variant="secondary" className="gap-1.5">
@@ -35,9 +48,8 @@ export function DetailOutletCard({ outlet }: { outlet: OutletSubjectData }) {
                 </Badge>
             </div>
 
-            <div className="mt-4 flex flex-col gap-4">
+            <div className="flex flex-col gap-4">
                 <div>
-                    <GroupLabel>Kontak</GroupLabel>
                     <DetailFieldGrid>
                         <DetailItem label="Telepon" value={outlet.phone} />
                         <DetailItem label="Email" value={outlet.email} />
@@ -45,7 +57,6 @@ export function DetailOutletCard({ outlet }: { outlet: OutletSubjectData }) {
                 </div>
 
                 <div>
-                    <GroupLabel>Lokasi</GroupLabel>
                     <DetailFieldGrid>
                         <DetailItem
                             label="Tipe Area Layanan"
@@ -62,27 +73,64 @@ export function DetailOutletCard({ outlet }: { outlet: OutletSubjectData }) {
                 </div>
 
                 <div>
-                    <GroupLabel>Alamat</GroupLabel>
                     <DetailItem label="Alamat" value={outlet.address} />
                 </div>
-            </div>
 
-            {(hasCoords || outlet.photos.length > 0) && (
-                <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-1 border-t border-border pt-3">
-                    {hasCoords && (
-                        <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                            <MapPin aria-hidden="true" className="size-3.5" />
-                            {outlet.latitude}, {outlet.longitude}
-                        </span>
-                    )}
-                    {outlet.photos.length > 0 && (
-                        <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                            <Camera aria-hidden="true" className="size-3.5" />
-                            {outlet.photos.length} foto
-                        </span>
+                <div>
+                    <Text variant="xs" weight="semibold" className="mb-2 flex items-center gap-1.5">
+                        <Camera aria-hidden="true" className="size-3.5" />
+                        Foto Outlet
+                    </Text>
+
+                    {photos.length > 0 ? (
+                        <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+                            {photos.map((photo, index) => (
+                                <a
+                                    key={photo}
+                                    href={photo}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                    aria-label={`Buka foto outlet ${index + 1}`}
+                                    className="group overflow-hidden rounded-lg border border-border transition-colors focus-visible:ring-3 focus-visible:ring-ring/50"
+                                >
+                                    <img
+                                        src={photo}
+                                        alt={`Foto outlet ${outlet.name} ${index + 1}`}
+                                        loading="lazy"
+                                        className="aspect-4/3 w-full object-cover transition-transform group-hover:scale-105"
+                                    />
+                                </a>
+                            ))}
+                        </div>
+                    ) : (
+                        <Text variant="xs" className="text-muted-foreground">
+                            Tidak ada foto outlet.
+                        </Text>
                     )}
                 </div>
-            )}
+
+                {coords && (
+                    <div className="mt-2">
+                        <Text variant="xs" weight="semibold" className="mb-2 flex items-center gap-1.5">
+                            <MapPin aria-hidden="true" className="size-3.5" />
+                            Peta Lokasi
+                        </Text>
+
+                        <Text variant="xs" weight="medium" className="text-muted-foreground">
+                            {outlet.latitude}, {outlet.longitude}
+                        </Text>
+
+                        <iframe
+                            src={`https://www.google.com/maps?q=${coords.lat},${coords.lng}&z=15&output=embed`}
+                            title={`Peta lokasi ${outlet.name}`}
+                            loading="lazy"
+                            allowFullScreen
+                            referrerPolicy="no-referrer-when-downgrade"
+                            className="mt-2 h-56 w-full rounded-lg border border-border"
+                        />
+                    </div>
+                )}
+            </div>
         </div>
     )
 }

@@ -3,8 +3,10 @@ import {
     Check,
     ClipboardCheck,
     Component,
+    Mail,
     Notebook,
     PencilLine,
+    Phone,
     Undo2,
     User,
     X,
@@ -25,7 +27,7 @@ import {
 } from "../../services/merchant-approval.mappers"
 import type { ApprovalDetail, ReviewComponent } from "../../types/merchant-approval.types"
 import { Reviewer } from "../shared/reviewer"
-import { ApplicationStatusBadge, ReviewStatusBadge } from "../shared/status-badge"
+import { ApplicationStatusBadge, MerchantStatusBadge, ReviewStatusBadge } from "../shared/status-badge"
 import type { ApprovalStep } from "./approval-timeline"
 
 interface DetailSidebarProps {
@@ -139,6 +141,13 @@ export function DetailSidebar({
                         <ApplicationStatusBadge status={approval.application.status} />
                     </div>
 
+                    <div className="flex items-center justify-between gap-3">
+                        <Text variant="xs" className="text-muted-foreground">
+                            Status Merchant
+                        </Text>
+                        <MerchantStatusBadge status={approval.merchant.status} />
+                    </div>
+
                     {(canClaim || canRelease || canRevision || canReject || canApprove) && (
                         <div className="flex flex-col gap-2">
                             {canClaim && (
@@ -222,6 +231,27 @@ export function DetailSidebar({
                     </div>
                 </div>
             </SidebarCard>
+
+            {/* Informasi Pemilik */}
+            {approval.merchant.owner && (
+                <SidebarCard icon={User} title="Informasi Pemilik">
+                    <div className="flex flex-col gap-2.5">
+                        <div className="flex min-w-0 items-center gap-2">
+                            <Mail aria-hidden="true" className="size-3.5 shrink-0 text-muted-foreground" />
+                            <Text variant="xs" truncate className="text-foreground">
+                                {approval.merchant.owner.email}
+                            </Text>
+                        </div>
+
+                        <div className="flex min-w-0 items-center gap-2">
+                            <Phone aria-hidden="true" className="size-3.5 shrink-0 text-muted-foreground" />
+                            <Text variant="xs" truncate className="text-foreground">
+                                {approval.merchant.owner.phone ?? "—"}
+                            </Text>
+                        </div>
+                    </div>
+                </SidebarCard>
+            )}
 
             {/* Ringkasan Komponen */}
             <SidebarCard icon={Component} title="Ringkasan Komponen">

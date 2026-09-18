@@ -27,6 +27,7 @@ export type {
     ApprovalReview,
     ApprovalSummary,
     ApplicationStatus,
+    MerchantStatus,
     ReviewComponent,
     ReviewStatus,
 } from "./types/merchant-approval.types"

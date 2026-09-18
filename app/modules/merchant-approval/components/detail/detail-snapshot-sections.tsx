@@ -7,6 +7,7 @@ import {
     IDENTITY_TYPE_LABELS,
     LEGAL_ENTITY_TYPE_LABELS,
     MERCHANT_TYPE_LABELS,
+    type SnapshotSectionKey,
 } from "../../services/merchant-approval.mappers"
 import type { ApplicationSnapshotData } from "../../types/merchant-approval.types"
 import { DetailFieldGrid, DetailItem } from "./detail-detail-item"
@@ -34,7 +35,13 @@ function EmptyNote({ icon: Icon, title, description }: { icon: LucideIcon; title
     )
 }
 
-export function DetailSnapshotSections({ snapshot }: { snapshot: ApplicationSnapshotData }) {
+export function DetailSnapshotSections({
+    snapshot,
+    changed,
+}: {
+    snapshot: ApplicationSnapshotData
+    changed?: Set<SnapshotSectionKey>
+}) {
     const subjects = snapshot.subjects
     const business = subjects.merchant?.data
     const identity = subjects.merchant_identity?.data
@@ -49,6 +56,7 @@ export function DetailSnapshotSections({ snapshot }: { snapshot: ApplicationSnap
                 icon={Store}
                 title="Informasi Bisnis"
                 description="Informasi utama merchant"
+                badge={changed?.has("business") ? "Berubah" : undefined}
             >
                 {business ? (
                     <DetailFieldGrid>
@@ -77,6 +85,7 @@ export function DetailSnapshotSections({ snapshot }: { snapshot: ApplicationSnap
                 icon={Contact}
                 title="Identitas Pemilik"
                 description="Identitas utama pemilik merchant"
+                badge={changed?.has("identity") ? "Berubah" : undefined}
             >
                 {identity ? (
                     <DetailFieldGrid>
@@ -102,6 +111,7 @@ export function DetailSnapshotSections({ snapshot }: { snapshot: ApplicationSnap
                 description="Informasi badan hukum (Khusus merchant perusahaan)"
                 icon={Building2}
                 title="Badan Hukum"
+                badge={changed?.has("legal_entity") ? "Berubah" : undefined}
             >
                 {legalEntity ? (
                     <DetailFieldGrid>
@@ -132,6 +142,7 @@ export function DetailSnapshotSections({ snapshot }: { snapshot: ApplicationSnap
                 icon={Layers}
                 title="Layanan"
                 description="Layanan yang dipilih merchant."
+                badge={changed?.has("service") ? "Berubah" : undefined}
             >
                 {service ? (
                     <DetailFieldGrid>
@@ -152,6 +163,7 @@ export function DetailSnapshotSections({ snapshot }: { snapshot: ApplicationSnap
                 icon={Tags}
                 title="Kategori"
                 description={`${subjects.merchant_category.length} kategori terdaftar`}
+                badge={changed?.has("category") ? "Berubah" : undefined}
             >
                 {subjects.merchant_category.length > 0 ? (
                     <ul className="flex flex-col gap-2">
@@ -183,6 +195,7 @@ export function DetailSnapshotSections({ snapshot }: { snapshot: ApplicationSnap
                 icon={MapPin}
                 title="Outlet"
                 description={`${activeOutletCount} outlet aktif`}
+                badge={changed?.has("outlet") ? "Berubah" : undefined}
             >
                 {subjects.merchant_outlet.length > 0 ? (
                     <div className="flex flex-col gap-3">
@@ -204,6 +217,7 @@ export function DetailSnapshotSections({ snapshot }: { snapshot: ApplicationSnap
                 icon={FileText}
                 title="Dokumen"
                 description={`${subjects.merchant_document.length} dokumen diunggah`}
+                badge={changed?.has("document") ? "Berubah" : undefined}
             >
                 {subjects.merchant_document.length > 0 ? (
                     <div className="flex flex-col gap-2">
@@ -225,6 +239,7 @@ export function DetailSnapshotSections({ snapshot }: { snapshot: ApplicationSnap
                 icon={Landmark}
                 title="Pencairan Dana"
                 description={`${subjects.payout_account.length} rekening terdaftar`}
+                badge={changed?.has("payout") ? "Berubah" : undefined}
             >
                 {subjects.payout_account.length > 0 ? (
                     <div className="flex flex-col gap-3">
