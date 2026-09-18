@@ -1,5 +1,15 @@
-import { Check, ClipboardCheck, PencilLine, Undo2, X } from "lucide-react"
-
+import {
+    Activity,
+    Check,
+    ClipboardCheck,
+    Component,
+    Notebook,
+    PencilLine,
+    Undo2,
+    User,
+    X,
+    type LucideIcon,
+} from "lucide-react"
 import { Button } from "~/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card"
 import { Empty, EmptyTitle } from "~/components/ui/empty"
@@ -7,7 +17,6 @@ import { Progress } from "~/components/ui/progress"
 import { Spinner } from "~/components/ui/spinner"
 import { Text } from "~/components/ui/text"
 import { formatDateTime } from "~/lib/format"
-import { cn } from "~/lib/utils"
 import {
     findReview,
     REVIEW_COMPONENT_LABELS,
@@ -37,13 +46,17 @@ interface DetailSidebarProps {
     onOpenApprove: () => void
 }
 
-function SidebarCard({ title, children }: { title: string; children: React.ReactNode }) {
+function SidebarCard({ icon: Icon, title, children }: { icon: LucideIcon; title: string; children: React.ReactNode }) {
     return (
         <Card size="sm" className="min-w-0">
             <CardHeader className="border-b">
-                <CardTitle>{title}</CardTitle>
+                <CardTitle className="flex items-center gap-2 text-xs font-bold">
+                    <Icon className="size-4" />
+                    {title}
+                </CardTitle>
             </CardHeader>
-            <CardContent className="pt-4">{children}</CardContent>
+
+            <CardContent className="pt-2">{children}</CardContent>
         </Card>
     )
 }
@@ -117,7 +130,7 @@ export function DetailSidebar({
     return (
         <div className="space-y-4 lg:sticky lg:top-4">
             {/* Status & Actions */}
-            <SidebarCard title="Status & Actions">
+            <SidebarCard icon={Activity} title="Status & Actions">
                 <div className="flex flex-col gap-4">
                     <div className="flex items-center justify-between gap-3">
                         <Text variant="xs" className="text-muted-foreground">
@@ -129,7 +142,7 @@ export function DetailSidebar({
                     {(canClaim || canRelease || canRevision || canReject || canApprove) && (
                         <div className="flex flex-col gap-2">
                             {canClaim && (
-                                <Button onClick={onClaim} disabled={isSubmitting}>
+                                <Button size="lg" onClick={onClaim} disabled={isSubmitting}>
                                     {isSubmitting ? (
                                         <Spinner aria-hidden="true" />
                                     ) : (
@@ -138,28 +151,41 @@ export function DetailSidebar({
                                     Klaim Review
                                 </Button>
                             )}
-                            {canRelease && (
-                                <Button variant="outline" onClick={onOpenRelease} disabled={isSubmitting}>
-                                    <Undo2 aria-hidden="true" />
-                                    Lepas Review
-                                </Button>
-                            )}
-                            {canRevision && (
-                                <Button variant="outline" onClick={onOpenRevision} disabled={isSubmitting}>
-                                    <PencilLine aria-hidden="true" />
-                                    Minta Revisi
+                            {canApprove && (
+                                <Button
+                                    size="lg"
+                                    onClick={onOpenApprove}
+                                    disabled={isSubmitting}
+                                    className="bg-green-500 hover:bg-green-600"
+                                >
+                                    <Check aria-hidden="true" />
+                                    <Text variant="sm" weight="semibold">
+                                        Setujui
+                                    </Text>
                                 </Button>
                             )}
                             {canReject && (
-                                <Button variant="destructive" onClick={onOpenReject} disabled={isSubmitting}>
+                                <Button size="lg" variant="destructive" onClick={onOpenReject} disabled={isSubmitting}>
                                     <X aria-hidden="true" />
-                                    Tolak
+                                    <Text variant="sm" weight="semibold">
+                                        Tolak
+                                    </Text>
                                 </Button>
                             )}
-                            {canApprove && (
-                                <Button onClick={onOpenApprove} disabled={isSubmitting}>
-                                    <Check aria-hidden="true" />
-                                    Setujui
+                            {canRelease && (
+                                <Button size="lg" variant="outline" onClick={onOpenRelease} disabled={isSubmitting}>
+                                    <Undo2 aria-hidden="true" />
+                                    <Text variant="sm" weight="semibold">
+                                        Lepas Review
+                                    </Text>
+                                </Button>
+                            )}
+                            {canRevision && (
+                                <Button size="lg" variant="outline" onClick={onOpenRevision} disabled={isSubmitting}>
+                                    <PencilLine aria-hidden="true" />
+                                    <Text variant="sm" weight="semibold">
+                                        Minta Revisi
+                                    </Text>
                                 </Button>
                             )}
                         </div>
@@ -168,7 +194,7 @@ export function DetailSidebar({
             </SidebarCard>
 
             {/* Informasi Reviewer */}
-            <SidebarCard title="Informasi Reviewer">
+            <SidebarCard icon={User} title="Informasi Reviewer">
                 <div className="flex flex-col gap-3">
                     <div className="flex items-center justify-between gap-3">
                         <Text variant="xs" className="text-muted-foreground">
@@ -198,7 +224,7 @@ export function DetailSidebar({
             </SidebarCard>
 
             {/* Ringkasan Komponen */}
-            <SidebarCard title="Ringkasan Komponen">
+            <SidebarCard icon={Component} title="Ringkasan Komponen">
                 {subjects.length > 0 ? (
                     <div className="flex flex-col gap-4">
                         <div>
@@ -251,7 +277,7 @@ export function DetailSidebar({
             </SidebarCard>
 
             {/* Catatan Reviewer */}
-            <SidebarCard title="Catatan Reviewer">
+            <SidebarCard icon={Notebook} title="Catatan Reviewer">
                 <div className="flex flex-col gap-3">
                     {approval.decision_reason && (
                         <div className="rounded-lg bg-muted/40 p-3">
@@ -291,7 +317,7 @@ export function DetailSidebar({
             </SidebarCard>
 
             {/* Timeline Approval */}
-            <SidebarCard title="Timeline Approval">
+            {/* <SidebarCard title="Timeline Approval">
                 <ol className="flex flex-col">
                     {timelineSteps.map((step, index) => (
                         <li key={`${step.title}-${index}`} className="flex gap-3">
@@ -338,7 +364,7 @@ export function DetailSidebar({
                         </li>
                     ))}
                 </ol>
-            </SidebarCard>
+            </SidebarCard> */}
         </div>
     )
 }

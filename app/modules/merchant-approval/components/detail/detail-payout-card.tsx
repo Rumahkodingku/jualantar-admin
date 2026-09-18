@@ -6,18 +6,18 @@ import { maskMiddle } from "~/lib/mask"
 
 export function DetailPayoutCard({ account }: { account: PayoutSubjectData }) {
     return (
-        <div className="rounded-xl border border-border bg-card p-4">
+        <div className="rounded-xl">
             <DetailFieldGrid>
                 <DetailItem label="Bank" value={account.bank_name} prominent />
                 <DetailItem label="Nomor Rekening" value={maskMiddle(account.account_number)} mono />
                 <DetailItem label="Nama Pemilik" value={account.account_name} />
                 <div className="min-w-0">
-                    <Text variant="xs" className="text-muted-foreground">
+                    <Text variant="xs" weight="semibold">
                         Rekening Utama
                     </Text>
                     <div className="mt-1">
                         {account.is_primary ? (
-                            <Badge>Rekening Utama</Badge>
+                            <Badge className="p-4">Rekening Utama</Badge>
                         ) : (
                             <Text variant="sm" className="text-muted-foreground">
                                 Bukan utama

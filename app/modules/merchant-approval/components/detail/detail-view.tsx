@@ -1,4 +1,4 @@
-import { Component, Copy, Image, Inbox, MapPin, NotebookPen, Store, Timeline } from "lucide-react"
+import { Component, Copy, Image, Inbox, MapPin, NotebookPen, Store, StoreIcon, Timeline } from "lucide-react"
 import { useMemo, useState, type ReactNode } from "react"
 
 import { Button } from "~/components/ui/button"
@@ -54,36 +54,6 @@ function errorMessage(error: unknown, fallback: string): string {
     }
     return fallback
 }
-
-// function ApprovalTimelineItem({ title, date, completed }: { title: string; date: string; completed: boolean }) {
-//     return (
-//         <div className="flex items-start gap-3 sm:flex-col sm:items-center sm:gap-0 sm:text-center">
-//             <span
-//                 aria-hidden="true"
-//                 className={cn(
-//                     "relative z-10 flex size-6 shrink-0 items-center justify-center rounded-full border-2 sm:mx-auto",
-//                     completed
-//                         ? "border-emerald-500 bg-emerald-500 text-white"
-//                         : "border-emerald-500/40 bg-background text-transparent"
-//                 )}
-//             >
-//                 {completed && <Check aria-hidden="true" className="size-3.5" />}
-//             </span>
-//             <div className="flex min-w-0 flex-col sm:mt-2">
-//                 <Text
-//                     variant="xs"
-//                     weight="bold"
-//                     className={completed ? "text-emerald-700 dark:text-emerald-400" : "text-muted-foreground"}
-//                 >
-//                     {title}
-//                 </Text>
-//                 <Text variant="xs" weight="medium" className="mt-1 text-muted-foreground">
-//                     {date}
-//                 </Text>
-//             </div>
-//         </div>
-//     )
-// }
 
 function DetailTabLayout({ children, sidebar }: { children: ReactNode; sidebar: ReactNode }) {
     return (
@@ -159,9 +129,7 @@ export function DetailView({ approval }: { approval: ApprovalDetail }) {
             },
         ]
 
-        // Tahap pertama yang belum selesai adalah tahap yang sedang berjalan
         const activeIndex = raw.findIndex((step) => !step.done)
-
         return raw.map((step, index) => {
             let stepStatus: ApprovalStatus = step.done ? "completed" : "upcoming"
             if (index === activeIndex) stepStatus = isRejected ? "rejected" : "current"
@@ -346,11 +314,18 @@ export function DetailView({ approval }: { approval: ApprovalDetail }) {
                 <CardContent className="p-0">
                     {/* Top Section */}
                     <div className="px-6">
-                        <MerchantLogo
-                            logo={merchantLogo}
-                            name={approval.merchant.business_name}
-                            className="size-14 shrink-0 rounded-xl text-sm"
-                        />
+                        {merchantLogo ? (
+                            <MerchantLogo
+                                logo={merchantLogo}
+                                name={approval.merchant.business_name}
+                                className="size-14 shrink-0 rounded-xl text-sm"
+                            />
+                        ) : (
+                            <div className="mb-2 flex size-16 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-muted text-xs font-semibold text-muted-foreground">
+                                <StoreIcon />
+                            </div>
+                        )}
+
                         <div className="flex flex-col gap-5 xl:flex-row xl:items-start xl:justify-between">
                             {/* Merchant Information */}
                             <div className="min-w-0 flex-1">
