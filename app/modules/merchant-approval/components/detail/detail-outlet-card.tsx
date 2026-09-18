@@ -3,9 +3,10 @@ import type { ReactNode } from "react"
 import { Badge } from "~/components/ui/badge"
 import { Text } from "~/components/ui/text"
 import { cn } from "~/lib/utils"
-import { SERVICE_AREA_TYPE_LABELS, geographyLabel } from "../../services/merchant-approval.mappers"
+import { SERVICE_AREA_TYPE_LABELS } from "../../services/merchant-approval.labels"
+import { geographyLabel } from "../../services/merchant-approval.mappers"
 import type { OutletSubjectData } from "../../types/merchant-approval.types"
-import { DetailFieldGrid, DetailItem } from "./detail-detail-item"
+import { DetailFieldGrid, DetailItem } from "./detail-field"
 
 function coordinates(outlet: OutletSubjectData): { lat: number; lng: number } | null {
     if (!outlet.latitude || !outlet.longitude) return null

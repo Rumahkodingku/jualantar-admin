@@ -1,16 +1,9 @@
 import { useState } from "react"
-import { Badge } from "~/components/ui/badge"
+import { StoreIcon } from "lucide-react"
+
 import { Text } from "~/components/ui/text"
 import { cn } from "~/lib/utils"
-import { MERCHANT_TYPE_LABELS } from "../../services/merchant-approval.mappers"
-import type { MerchantSummary, MerchantType } from "../../types/merchant-approval.types"
-import { Building, StoreIcon } from "lucide-react"
-
-function merchantInitials(name: string): string {
-    const parts = name.trim().split(/\s+/).slice(0, 2)
-    const initials = parts.map((part) => part.charAt(0).toUpperCase()).join("")
-    return initials || "?"
-}
+import type { MerchantSummary } from "../../types/merchant-approval.types"
 
 export function MerchantLogo({ logo, name, className }: { logo?: string | null; name: string; className?: string }) {
     const [hasError, setHasError] = useState(false)
@@ -32,7 +25,6 @@ export function MerchantLogo({ logo, name, className }: { logo?: string | null; 
                     onError={() => setHasError(true)}
                 />
             ) : (
-                // merchantInitials(name)
                 <StoreIcon className="size-4 text-muted-foreground" />
             )}
         </span>
@@ -60,46 +52,5 @@ export function MerchantIdentity({ merchant }: { merchant: MerchantSummary | nul
                 </Text>
             </div>
         </div>
-    )
-}
-
-export function MerchantTypeBadge({ type }: { type: MerchantType | null }) {
-    if (!type) {
-        return (
-            <Text variant="xs" className="text-muted-foreground">
-                -
-            </Text>
-        )
-    }
-
-    return (
-        <Badge variant="secondary" className="py-4">
-            {MERCHANT_TYPE_LABELS.individual ? (
-                <StoreIcon className="mr-1 size-3" />
-            ) : (
-                <Building className="mr-1 size-3" />
-            )}
-            <Text variant="xs" weight="semibold">
-                {MERCHANT_TYPE_LABELS[type]}
-            </Text>
-        </Badge>
-    )
-}
-
-export function ServiceBadge({ name }: { name?: string | null }) {
-    if (!name) {
-        return (
-            <Text variant="xs" className="text-muted-foreground">
-                -
-            </Text>
-        )
-    }
-
-    return (
-        <Badge variant="secondary" className="py-4">
-            <Text variant="xs" weight="semibold">
-                {name}
-            </Text>
-        </Badge>
     )
 }

@@ -2,7 +2,8 @@ import { ExternalLink, FileText } from "lucide-react"
 
 import { Text } from "~/components/ui/text"
 import { cn } from "~/lib/utils"
-import { DOCUMENT_TYPE_LABELS, formatFileSize } from "../../services/merchant-approval.mappers"
+import { DOCUMENT_TYPE_LABELS } from "../../services/merchant-approval.labels"
+import { formatFileSize } from "../../services/merchant-approval.mappers"
 import type { DocumentSubjectData } from "../../types/merchant-approval.types"
 
 export function DetailDocumentPreview({ document }: { document: DocumentSubjectData }) {

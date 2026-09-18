@@ -1,6 +1,7 @@
 import { Text } from "~/components/ui/text"
 import { formatDateTime } from "~/lib/format"
-import { EVENT_TYPE_LABELS, eventActorLabel, REVIEW_COMPONENT_LABELS } from "../../services/merchant-approval.mappers"
+import { EVENT_TYPE_LABELS, REVIEW_COMPONENT_LABELS } from "../../services/merchant-approval.labels"
+import { eventActorLabel } from "../../services/merchant-approval.mappers"
 import type { ApprovalEvent, ReviewComponent } from "../../types/merchant-approval.types"
 import { ApprovalTimeline, type ApprovalStep } from "./approval-timeline"
 

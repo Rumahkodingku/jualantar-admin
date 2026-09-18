@@ -10,10 +10,6 @@ export const reviewSchema = z.object({
     note: z.string().max(2000).optional(),
 })
 
-export const reviewNoteSchema = z.object({
-    note: z.string().max(2000).optional(),
-})
-
 export const revisionItemSchema = z.object({
     component: z.enum(REVIEW_COMPONENTS),
     subject_type: z.string().min(1),
@@ -31,7 +27,6 @@ export const rejectionSchema = z.object({
 })
 
 export type ReviewInput = z.infer<typeof reviewSchema>
-export type ReviewNoteInput = z.infer<typeof reviewNoteSchema>
 export type RevisionInput = z.infer<typeof revisionSchema>
 export type RevisionItemInput = z.infer<typeof revisionItemSchema>
 export type RejectionInput = z.infer<typeof rejectionSchema>

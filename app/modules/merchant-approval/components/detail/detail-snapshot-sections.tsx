@@ -3,14 +3,13 @@ import { Accordion } from "~/components/ui/accordion"
 import { Text } from "~/components/ui/text"
 import { formatDate } from "~/lib/format"
 import {
-    geographyLabel,
     IDENTITY_TYPE_LABELS,
     LEGAL_ENTITY_TYPE_LABELS,
     MERCHANT_TYPE_LABELS,
-    type SnapshotSectionKey,
-} from "../../services/merchant-approval.mappers"
+} from "../../services/merchant-approval.labels"
+import { geographyLabel, type SnapshotSectionKey } from "../../services/merchant-approval.mappers"
 import type { ApplicationSnapshotData } from "../../types/merchant-approval.types"
-import { DetailFieldGrid, DetailItem } from "./detail-detail-item"
+import { DetailFieldGrid, DetailItem } from "./detail-field"
 import { DetailDocumentPreview } from "./detail-document-preview"
 import { DetailOutletCard } from "./detail-outlet-card"
 import { DetailPayoutCard } from "./detail-payout-card"

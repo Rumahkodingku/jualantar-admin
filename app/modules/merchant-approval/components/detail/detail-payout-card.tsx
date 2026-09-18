@@ -1,7 +1,7 @@
 import { Badge } from "~/components/ui/badge"
 import { Text } from "~/components/ui/text"
 import type { PayoutSubjectData } from "../../types/merchant-approval.types"
-import { DetailFieldGrid, DetailItem } from "./detail-detail-item"
+import { DetailFieldGrid, DetailItem } from "./detail-field"
 import { maskMiddle } from "~/lib/mask"
 
 export function DetailPayoutCard({ account }: { account: PayoutSubjectData }) {

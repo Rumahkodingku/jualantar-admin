@@ -1,6 +1,6 @@
 import { Text } from "~/components/ui/text"
 import { formatDateTime } from "~/lib/format"
-import { REVIEW_COMPONENT_LABELS } from "../../services/merchant-approval.mappers"
+import { REVIEW_COMPONENT_LABELS } from "../../services/merchant-approval.labels"
 import type { ApprovalRevision } from "../../types/merchant-approval.types"
 import { RevisionStatusBadge } from "../shared/status-badge"
 

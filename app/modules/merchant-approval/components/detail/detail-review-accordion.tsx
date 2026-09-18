@@ -3,7 +3,7 @@ import { useMemo, useState } from "react"
 import { Accordion } from "~/components/ui/accordion"
 import { groupSubjectsByComponent, type ReviewableSubject } from "../../services/merchant-approval.mappers"
 import type { ApprovalReview } from "../../types/merchant-approval.types"
-import { DetailComponentReviewSection } from "./detail-component-review-card"
+import { DetailComponentReviewSection } from "./detail-component-review-section"
 
 interface DetailReviewAccordionProps {
     subjects: ReviewableSubject[]

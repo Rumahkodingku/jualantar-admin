@@ -1,6 +1,6 @@
 import * as React from "react"
 import { Check, X } from "lucide-react"
-import { cn } from "cn"
+import { cn } from "~/lib/utils"
 import { Text } from "~/components/ui/text"
 
 /* -------------------------------------------------------------------------- */

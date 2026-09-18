@@ -5,7 +5,7 @@ import {
     MERCHANT_STATUS_META,
     REVISION_STATUS_META,
     REVIEW_STATUS_META,
-} from "../../services/merchant-approval.mappers"
+} from "../../services/merchant-approval.labels"
 import type {
     ApplicationStatus,
     MerchantStatus,

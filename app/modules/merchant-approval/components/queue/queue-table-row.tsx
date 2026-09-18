@@ -6,8 +6,10 @@ import { TableCell, TableRow } from "~/components/ui/table"
 import { Text } from "~/components/ui/text"
 import { formatDateTime } from "~/lib/format"
 import type { ApprovalListItem } from "../../types/merchant-approval.types"
-import { MerchantIdentity, MerchantTypeBadge, ServiceBadge } from "../shared/merchant"
+import { MerchantIdentity } from "../shared/merchant-identity"
+import { MerchantTypeBadge } from "../shared/merchant-type-badge"
 import { Reviewer } from "../shared/reviewer"
+import { ServiceBadge } from "../shared/service-badge"
 import { ApplicationStatusBadge } from "../shared/status-badge"
 
 interface QueueTableRowProps {

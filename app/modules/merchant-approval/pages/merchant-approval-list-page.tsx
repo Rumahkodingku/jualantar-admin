@@ -1,14 +1,5 @@
 import { useCallback, useState } from "react"
-import { useSearchParams } from "react-router"
 
-import {
-    Pagination,
-    PaginationContent,
-    PaginationItem,
-    PaginationNext,
-    PaginationPrevious,
-} from "~/components/ui/pagination"
-import { Text } from "~/components/ui/text"
 import { toast } from "~/components/ui/toast"
 import { PageHeader } from "~/components/page-header"
 import { ApiError } from "~/lib/api"
@@ -17,25 +8,18 @@ import { QueueEmptyState } from "../components/queue/queue-empty-state"
 import { QueueErrorState } from "../components/queue/queue-error-state"
 import { QueueLoadingState } from "../components/queue/queue-loading-state"
 import { QueueMobileCard } from "../components/queue/queue-mobile-card"
-import { QueueToolbar } from "../components/queue/queue-toolbar"
+import { QueuePagination } from "../components/queue/queue-pagination"
 import { QueueStatusTabs } from "../components/queue/queue-status-tabs"
-import { QueueSummary } from "../components/queue/queue-summary"
 import { QueueTable } from "../components/queue/queue-table"
+import { QueueToolbar } from "../components/queue/queue-toolbar"
+import { useApprovalQueueParams } from "../hooks/use-approval-queue-params"
 import { useClaimApproval } from "../services/merchant-approval.mutations"
 import { useApprovals } from "../services/merchant-approval.queries"
-import type {
-    ApprovalListItem,
-    ApprovalListParams,
-    ApprovalSortColumn,
-    ApplicationStatus,
-    SortOrder,
-} from "../types/merchant-approval.types"
-import { cn } from "cn"
-
-const DEFAULT_PER_PAGE = 15
+import type { ApprovalListItem } from "../types/merchant-approval.types"
 
 export function MerchantApprovalListPage() {
-    const [searchParams, setSearchParams] = useSearchParams()
+    const { status, assignedTo, search, sort, order, page, params, updateParams, hasFilters } =
+        useApprovalQueueParams()
     const { data: session } = useAuthSession()
     const currentUserId = session?.id
     const canClaimPermission = useHasPermission("merchant.approval.claim")
@@ -43,46 +27,7 @@ export function MerchantApprovalListPage() {
 
     const [claimingId, setClaimingId] = useState<string | null>(null)
 
-    const status = searchParams.get("status") ?? "all"
-    const assignedTo = searchParams.get("assigned_to") ?? "all"
-    const search = searchParams.get("search") ?? ""
-    const sort = (searchParams.get("sort") as ApprovalSortColumn | null) ?? "created_at"
-    const order = (searchParams.get("order") as SortOrder | null) ?? "desc"
-    const page = Number(searchParams.get("page") ?? "1") || 1
-    const perPage = Number(searchParams.get("per_page") ?? String(DEFAULT_PER_PAGE)) || DEFAULT_PER_PAGE
-
-    const params: ApprovalListParams = {
-        status: status === "all" ? undefined : (status as ApplicationStatus),
-        assignment: assignedTo === "all" ? undefined : assignedTo,
-        search: search || undefined,
-        sort,
-        order,
-        page,
-        per_page: perPage,
-    }
-
     const { data, isLoading, isError, isFetching, refetch } = useApprovals(params)
-
-    const updateParams = useCallback(
-        (updates: Record<string, string | null>, resetPage = true) => {
-            setSearchParams(
-                (previous) => {
-                    const next = new URLSearchParams(previous)
-
-                    for (const [key, value] of Object.entries(updates)) {
-                        if (value === null || value === "") next.delete(key)
-                        else next.set(key, value)
-                    }
-
-                    if (resetPage) next.delete("page")
-
-                    return next
-                },
-                { replace: true }
-            )
-        },
-        [setSearchParams]
-    )
 
     const handleClaim = (id: string) => {
         setClaimingId(id)
@@ -111,10 +56,7 @@ export function MerchantApprovalListPage() {
         [canClaimPermission]
     )
 
-    const hasFilters = Boolean(search) || status !== "all" || assignedTo !== "all"
     const meta = data?.meta
-    const canGoPrevious = page > 1
-    const canGoNext = meta ? page < meta.last_page : false
 
     return (
         <div className="flex min-w-0 flex-1 flex-col gap-5 md:gap-6">
@@ -181,70 +123,14 @@ export function MerchantApprovalListPage() {
                         ))}
                     </div>
 
-                    {/* Pagination */}
-                    <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                        <Text variant="xs" weight="medium" className="text-muted-foreground">
-                            Menampilkan <span className="font-semibold text-foreground">{data.items.length}</span> dari{" "}
-                            <span className="font-semibold text-foreground">{meta?.total ?? 0}</span> pengajuan
-                        </Text>
-
-                        <Pagination className="mx-0 w-auto justify-start sm:justify-end">
-                            <PaginationContent className="gap-1">
-                                <PaginationItem>
-                                    <PaginationPrevious
-                                        href="#"
-                                        aria-disabled={!canGoPrevious}
-                                        className={cn(
-                                            "h-8 rounded-md px-2.5 text-xs",
-                                            !canGoPrevious && "pointer-events-none opacity-40"
-                                        )}
-                                        onClick={(event) => {
-                                            event.preventDefault()
-
-                                            if (canGoPrevious) {
-                                                updateParams({ page: String(page - 1) }, false)
-                                            }
-                                        }}
-                                        text="Sebelumnya"
-                                    />
-                                </PaginationItem>
-
-                                <PaginationItem>
-                                    <div className="flex h-8 items-center px-3">
-                                        <Text
-                                            variant="xs"
-                                            weight="medium"
-                                            className="whitespace-nowrap text-muted-foreground"
-                                        >
-                                            Halaman <span className="font-semibold text-foreground">{page}</span> dari{" "}
-                                            <span className="font-semibold text-foreground">
-                                                {meta?.last_page ?? 1}
-                                            </span>
-                                        </Text>
-                                    </div>
-                                </PaginationItem>
-
-                                <PaginationItem>
-                                    <PaginationNext
-                                        href="#"
-                                        aria-disabled={!canGoNext}
-                                        className={cn(
-                                            "h-8 rounded-md px-2.5 text-xs",
-                                            !canGoNext && "pointer-events-none opacity-40"
-                                        )}
-                                        onClick={(event) => {
-                                            event.preventDefault()
-
-                                            if (canGoNext) {
-                                                updateParams({ page: String(page + 1) }, false)
-                                            }
-                                        }}
-                                        text="Berikutnya"
-                                    />
-                                </PaginationItem>
-                            </PaginationContent>
-                        </Pagination>
-                    </div>
+                    <QueuePagination
+                        page={page}
+                        count={data.items.length}
+                        total={meta?.total ?? 0}
+                        lastPage={meta?.last_page ?? 1}
+                        onPrevious={() => updateParams({ page: String(page - 1) }, false)}
+                        onNext={() => updateParams({ page: String(page + 1) }, false)}
+                    />
                 </div>
             )}
         </div>

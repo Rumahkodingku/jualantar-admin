@@ -19,21 +19,19 @@ import { Progress } from "~/components/ui/progress"
 import { Spinner } from "~/components/ui/spinner"
 import { Text } from "~/components/ui/text"
 import { formatDateTime } from "~/lib/format"
+import { REVIEW_COMPONENT_LABELS } from "../../services/merchant-approval.labels"
 import {
     findReview,
-    REVIEW_COMPONENT_LABELS,
     summarizeReviewProgress,
     type ReviewableSubject,
 } from "../../services/merchant-approval.mappers"
 import type { ApprovalDetail, ReviewComponent } from "../../types/merchant-approval.types"
 import { Reviewer } from "../shared/reviewer"
 import { ApplicationStatusBadge, MerchantStatusBadge, ReviewStatusBadge } from "../shared/status-badge"
-import type { ApprovalStep } from "./approval-timeline"
 
 interface DetailSidebarProps {
     approval: ApprovalDetail
     subjects: ReviewableSubject[]
-    timelineSteps: ApprovalStep[]
     currentUserId?: string
     canClaim: boolean
     canRelease: boolean
@@ -66,7 +64,6 @@ function SidebarCard({ icon: Icon, title, children }: { icon: LucideIcon; title:
 export function DetailSidebar({
     approval,
     subjects,
-    timelineSteps,
     currentUserId,
     canClaim,
     canRelease,
@@ -346,55 +343,6 @@ export function DetailSidebar({
                 </div>
             </SidebarCard>
 
-            {/* Timeline Approval */}
-            {/* <SidebarCard title="Timeline Approval">
-                <ol className="flex flex-col">
-                    {timelineSteps.map((step, index) => (
-                        <li key={`${step.title}-${index}`} className="flex gap-3">
-                            <div className="flex flex-col items-center">
-                                <span
-                                    aria-hidden="true"
-                                    className={cn(
-                                        "relative z-10 flex size-6 shrink-0 items-center justify-center rounded-full border-2",
-                                        step.status === "completed" && "border-emerald-500 bg-emerald-500 text-white",
-                                        step.status === "current" &&
-                                            "border-emerald-500 bg-background ring-4 ring-emerald-500/15",
-                                        step.status === "rejected" && "border-rose-500 bg-rose-500 text-white",
-                                        step.status === "upcoming" && "border-dashed border-muted-foreground/30"
-                                    )}
-                                >
-                                    {step.status === "completed" && <Check aria-hidden="true" className="size-3.5" />}
-                                    {step.status === "rejected" && <X aria-hidden="true" className="size-3.5" />}
-                                    {step.status === "current" && (
-                                        <span className="size-2 rounded-full bg-emerald-500" />
-                                    )}
-                                    {step.status === "upcoming" && (
-                                        <span className="size-1.5 rounded-full bg-muted-foreground/30" />
-                                    )}
-                                </span>
-                                {index < timelineSteps.length - 1 && <span className="my-1 w-px flex-1 bg-border" />}
-                            </div>
-                            <div className={cn("min-w-0", index < timelineSteps.length - 1 && "pb-4")}>
-                                <Text
-                                    variant="sm"
-                                    weight="medium"
-                                    className={cn(
-                                        step.status === "completed" && "text-emerald-700 dark:text-emerald-400",
-                                        step.status === "current" && "text-foreground",
-                                        step.status === "rejected" && "text-rose-600 dark:text-rose-400",
-                                        step.status === "upcoming" && "text-muted-foreground"
-                                    )}
-                                >
-                                    {step.title}
-                                </Text>
-                                <Text variant="xs" className="mt-0.5 text-muted-foreground">
-                                    {step.date}
-                                </Text>
-                            </div>
-                        </li>
-                    ))}
-                </ol>
-            </SidebarCard> */}
-        </div>
+            </div>
     )
 }
