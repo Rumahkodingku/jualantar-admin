@@ -7,14 +7,6 @@ import { SERVICE_AREA_TYPE_LABELS, geographyLabel } from "../../services/merchan
 import type { OutletSubjectData } from "../../types/merchant-approval.types"
 import { DetailFieldGrid, DetailItem } from "./detail-detail-item"
 
-function GroupLabel({ children }: { children: ReactNode }) {
-    return (
-        <Text variant="xs" weight="semibold" className="mb-2 text-muted-foreground">
-            {children}
-        </Text>
-    )
-}
-
 function coordinates(outlet: OutletSubjectData): { lat: number; lng: number } | null {
     if (!outlet.latitude || !outlet.longitude) return null
 
