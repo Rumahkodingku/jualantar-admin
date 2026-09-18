@@ -1,3 +1,5 @@
+import { formatDate } from "~/lib/format"
+import { maskMiddle } from "~/lib/mask"
 import type {
     ApplicationSnapshotData,
     ApplicationSnapshotSubjects,
@@ -120,6 +122,74 @@ export const REVIEW_COMPONENT_LABELS: Record<ReviewComponent, string> = {
     payout: "Pencairan Dana",
 }
 
+export const REVIEW_COMPONENT_TITLES: Record<ReviewComponent, string> = {
+    business: "Informasi Bisnis",
+    identity: "Identitas Pemilik",
+    legal_entity: "Badan Hukum",
+    service: "Layanan",
+    category: "Kategori",
+    outlet: "Outlet",
+    document: "Dokumen",
+    payout: "Pencairan Dana",
+}
+
+export const REVIEW_COMPONENT_DESCRIPTIONS: Record<ReviewComponent, string> = {
+    business: "Informasi bisnis, tipe merchant, deskripsi, dan informasi dasar lainnya.",
+    identity: "Nama lengkap, jenis identitas, nomor identitas, dan tanggal lahir.",
+    legal_entity: "Informasi badan hukum untuk merchant perusahaan.",
+    service: "Layanan yang diajukan oleh merchant.",
+    category: "Kategori produk/layanan.",
+    outlet: "Informasi outlet, alamat, kontak, dan area layanan.",
+    document: "KTP, NPWP, rekening, swafoto, dan dokumen pendukung lainnya.",
+    payout: "Informasi rekening bank untuk pencairan dana.",
+}
+
+export const REVIEW_COMPONENT_GUIDES: Record<ReviewComponent, string> = {
+    business: "Verifikasi kesesuaian informasi bisnis dengan dokumen pendukung.",
+    identity: "Verifikasi kecocokan identitas pemilik dengan dokumen identitas.",
+    legal_entity: "Verifikasi keabsahan dokumen dan data badan hukum.",
+    service: "Pastikan layanan yang diajukan sesuai dengan layanan merchant.",
+    category: "Pastikan kategori yang dipilih sesuai dengan jenis layanan merchant.",
+    outlet: "Verifikasi kebenaran alamat, kontak, dan area layanan outlet.",
+    document: "Pastikan dokumen valid, terbaca, dan sesuai dengan ketentuan.",
+    payout: "Verifikasi keabsahan rekening untuk pencairan dana.",
+}
+
+export const REVIEW_COMPONENT_EMPTY_STATE: Record<ReviewComponent, { title: string; description: string }> = {
+    business: {
+        title: "Data bisnis belum tersedia",
+        description: "Informasi merchant tidak ditemukan pada snapshot pengajuan ini.",
+    },
+    identity: {
+        title: "Identitas pemilik belum tersedia",
+        description: "Data identitas pemilik tidak ditemukan pada snapshot pengajuan ini.",
+    },
+    legal_entity: {
+        title: "Tidak ada badan hukum",
+        description: "Merchant terdaftar sebagai merchant perorangan.",
+    },
+    service: {
+        title: "Data layanan tidak tersedia",
+        description: "Layanan tidak ditemukan pada snapshot pengajuan ini.",
+    },
+    category: {
+        title: "Belum ada kategori",
+        description: "Merchant belum mendaftarkan kategori pada pengajuan ini.",
+    },
+    outlet: {
+        title: "Belum ada outlet",
+        description: "Merchant belum menambahkan outlet pada pengajuan ini.",
+    },
+    document: {
+        title: "Belum ada dokumen",
+        description: "Merchant belum mengunggah dokumen pada pengajuan ini.",
+    },
+    payout: {
+        title: "Belum ada rekening pencairan",
+        description: "Merchant belum menambahkan rekening pencairan pada pengajuan ini.",
+    },
+}
+
 export const COMPONENT_SUBJECT_TYPE: Record<ReviewComponent, string> = {
     business: "merchant",
     identity: "merchant_identity",
@@ -214,7 +284,7 @@ function labelFor(component: ReviewComponent, data: Record<string, unknown>, ind
     }
 }
 
-const COMPONENT_ORDER: ReviewComponent[] = [
+export const COMPONENT_ORDER: ReviewComponent[] = [
     "business",
     "identity",
     "legal_entity",
@@ -224,6 +294,35 @@ const COMPONENT_ORDER: ReviewComponent[] = [
     "document",
     "payout",
 ]
+
+export interface ComponentSubjectGroup {
+    component: ReviewComponent
+    subjects: ReviewableSubject[]
+}
+
+/** Group flattened reviewable subjects into ordered component groups. */
+export function groupSubjectsByComponent(subjects: ReviewableSubject[]): ComponentSubjectGroup[] {
+    const grouped = new Map<ReviewComponent, ReviewableSubject[]>()
+
+    for (const subject of subjects) {
+        const list = grouped.get(subject.component)
+        if (list) list.push(subject)
+        else grouped.set(subject.component, [subject])
+    }
+
+    return COMPONENT_ORDER.map((component) => ({
+        component,
+        subjects: grouped.get(component) ?? [],
+    }))
+}
+
+/** Derive a single header status for a component from its subject statuses. */
+export function deriveComponentReviewStatus(statuses: ReviewStatus[]): ReviewStatus {
+    if (statuses.length === 0) return "pending"
+    if (statuses.every((status) => status === "verified")) return "verified"
+    if (statuses.every((status) => status === "rejected")) return "rejected"
+    return "pending"
+}
 
 /** Flatten snapshot subjects into an ordered list of reviewable subjects. */
 export function collectReviewableSubjects(snapshot: ApplicationSnapshotData | null): ReviewableSubject[] {
@@ -333,12 +432,14 @@ export function subjectFields(component: ReviewComponent, data: Record<string, u
                     label: "Tipe",
                     value: data.type ? (MERCHANT_TYPE_LABELS[data.type as MerchantType] ?? text("type")) : "-",
                 },
+                ...(data.description ? [{ label: "Deskripsi", value: text("description") }] : []),
             ]
         case "identity":
             return [
                 { label: "Nama Lengkap", value: text("full_name") },
                 { label: "Jenis Identitas", value: IDENTITY_TYPE_LABELS[text("id_type")] ?? text("id_type") },
-                { label: "Nomor Identitas", value: text("id_number") },
+                { label: "Nomor Identitas", value: maskMiddle(text("id_number")) },
+                { label: "Tanggal Lahir", value: formatDate(data.birth_date as string | null | undefined) },
             ]
         case "legal_entity":
             return [
@@ -346,7 +447,9 @@ export function subjectFields(component: ReviewComponent, data: Record<string, u
                 { label: "Jenis", value: LEGAL_ENTITY_TYPE_LABELS[text("entity_type")] ?? text("entity_type") },
                 { label: "NIB", value: text("nib") },
                 { label: "NPWP", value: text("npwp") },
+                { label: "Alamat", value: text("address") },
                 { label: "Wilayah", value: geographyLabel(data) },
+                { label: "Kode Pos", value: text("postal_code") },
             ]
         case "service":
             return [

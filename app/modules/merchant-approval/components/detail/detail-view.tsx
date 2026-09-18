@@ -32,8 +32,8 @@ import { Reviewer } from "../shared/reviewer"
 import { ApplicationStatusBadge } from "../shared/status-badge"
 import { DetailConfirmDialog } from "./detail-confirm-dialog"
 import { DetailTimeline } from "./detail-timeline"
-import { DetailComponentReviewCard } from "./detail-component-review-card"
 import { DetailRejectionDialog } from "./detail-rejection-dialog"
+import { DetailReviewAccordion } from "./detail-review-accordion"
 import { DetailRevisionDialog } from "./detail-revision-dialog"
 import { DetailRevisionHistory } from "./detail-revision-history"
 import { DetailSnapshotSections } from "./detail-snapshot-sections"
@@ -387,7 +387,7 @@ export function DetailView({ approval }: { approval: ApprovalDetail }) {
 
                                         {/* Slug + Merchant Type + Service */}
                                         <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
-                                            <Text variant="xs" className="font-mono text-muted-foreground">
+                                            <Text variant="xs" className="text-muted-foreground">
                                                 {approval.merchant.slug}
                                             </Text>
 
@@ -667,19 +667,16 @@ export function DetailView({ approval }: { approval: ApprovalDetail }) {
                 <TabsContent value="review">
                     <DetailTabLayout sidebar={sidebar}>
                         {subjects.length > 0 ? (
-                            <div className="grid gap-4 xl:grid-cols-2">
-                                {subjects.map((subject) => (
-                                    <DetailComponentReviewCard
-                                        key={subjectKey(subject)}
-                                        subject={subject}
-                                        review={findReview(approval.reviews, subject.subjectType, subject.subjectId)}
-                                        canReview={canReview}
-                                        isSubmitting={review.isPending && reviewingKey === subjectKey(subject)}
-                                        onVerify={(note) => handleReview(subject, "verified", note)}
-                                        onReject={(note) => handleReview(subject, "rejected", note)}
-                                    />
-                                ))}
-                            </div>
+                            <DetailReviewAccordion
+                                subjects={subjects}
+                                getReview={(subject) =>
+                                    findReview(approval.reviews, subject.subjectType, subject.subjectId)
+                                }
+                                canReview={canReview}
+                                isSubmitting={(subject) => review.isPending && reviewingKey === subjectKey(subject)}
+                                onVerify={(subject, note) => handleReview(subject, "verified", note)}
+                                onReject={(subject, note) => handleReview(subject, "rejected", note)}
+                            />
                         ) : (
                             <Text variant="sm" className="text-muted-foreground">
                                 Tidak ada komponen untuk direview.

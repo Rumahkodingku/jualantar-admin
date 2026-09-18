@@ -23,17 +23,34 @@ interface ApprovalTimelineProps extends React.ComponentPropsWithoutRef<"ol"> {
     steps: ApprovalStep[]
     /** Label untuk pembaca layar */
     label?: string
+    /** Arah layout. "horizontal" responsif (vertikal di mobile, horizontal di sm+). */
+    orientation?: "horizontal" | "vertical"
 }
 
 /* -------------------------------------------------------------------------- */
 /*  Container                                                                  */
 /* -------------------------------------------------------------------------- */
 
-export function ApprovalTimeline({ steps, label = "Status persetujuan", className, ...props }: ApprovalTimelineProps) {
+export function ApprovalTimeline({
+    steps,
+    label = "Status persetujuan",
+    orientation = "horizontal",
+    className,
+    ...props
+}: ApprovalTimelineProps) {
     return (
-        <ol aria-label={label} className={cn("flex flex-col sm:flex-row", className)} {...props}>
+        <ol
+            aria-label={label}
+            className={cn("flex flex-col", orientation === "horizontal" && "sm:flex-row", className)}
+            {...props}
+        >
             {steps.map((step, index) => (
-                <ApprovalTimelineItem key={`${step.title}-${index}`} {...step} isLast={index === steps.length - 1} />
+                <ApprovalTimelineItem
+                    key={`${step.title}-${index}`}
+                    {...step}
+                    isLast={index === steps.length - 1}
+                    orientation={orientation}
+                />
             ))}
         </ol>
     )
@@ -45,6 +62,7 @@ export function ApprovalTimeline({ steps, label = "Status persetujuan", classNam
 
 interface ApprovalTimelineItemProps extends ApprovalStep {
     isLast?: boolean
+    orientation?: "horizontal" | "vertical"
 }
 
 const STATUS_TEXT: Record<ApprovalStatus, string> = {
@@ -54,19 +72,28 @@ const STATUS_TEXT: Record<ApprovalStatus, string> = {
     rejected: "Ditolak",
 }
 
-export function ApprovalTimelineItem({ title, date, description, status, isLast = false }: ApprovalTimelineItemProps) {
+export function ApprovalTimelineItem({
+    title,
+    date,
+    description,
+    status,
+    isLast = false,
+    orientation = "horizontal",
+}: ApprovalTimelineItemProps) {
     const isCompleted = status === "completed"
     const isCurrent = status === "current"
     const isRejected = status === "rejected"
     const isUpcoming = status === "upcoming"
+    const isHorizontal = orientation === "horizontal"
 
     return (
         <li
             aria-current={isCurrent ? "step" : undefined}
             className={cn(
                 "relative flex items-start gap-4",
-                "sm:flex-1 sm:flex-col sm:items-center sm:gap-0 sm:text-center",
-                !isLast && "pb-8 sm:pb-0"
+                isHorizontal && "sm:flex-1 sm:flex-col sm:items-center sm:gap-0 sm:text-center",
+                !isLast && "pb-8",
+                isHorizontal && !isLast && "sm:pb-0"
             )}
         >
             {/* Garis penghubung — vertikal di mobile, horizontal di tablet ke atas */}
@@ -75,8 +102,10 @@ export function ApprovalTimelineItem({ title, date, description, status, isLast 
                     aria-hidden="true"
                     className={cn(
                         "absolute top-7.5 bottom-1.5 left-3 w-0.5 -translate-x-1/2 rounded-full",
-                        "sm:top-3 sm:bottom-auto sm:left-[calc(50%+18px)] sm:h-0.5 sm:w-[calc(100%-36px)] sm:translate-x-0 sm:-translate-y-1/2",
-                        "bg-linear-to-b sm:bg-linear-to-r",
+                        isHorizontal &&
+                            "sm:top-3 sm:bottom-auto sm:left-[calc(50%+18px)] sm:h-0.5 sm:w-[calc(100%-36px)] sm:translate-x-0 sm:-translate-y-1/2",
+                        "bg-linear-to-b",
+                        isHorizontal && "sm:bg-linear-to-r",
                         isCompleted && "from-emerald-500 to-emerald-500",
                         isCurrent && "from-emerald-500/70 to-border",
                         isRejected && "from-rose-500/70 to-border",
@@ -90,7 +119,8 @@ export function ApprovalTimelineItem({ title, date, description, status, isLast 
                 aria-hidden="true"
                 className={cn(
                     "relative z-10 mt-0.5 flex size-6 shrink-0 items-center justify-center rounded-full border-2",
-                    "transition-colors duration-300 sm:mt-0",
+                    "transition-colors duration-300",
+                    isHorizontal && "sm:mt-0",
                     isCompleted && "border-emerald-500 bg-emerald-500 text-white ring-4 ring-emerald-500/15",
                     isCurrent && "border-emerald-500 bg-background ring-4 ring-emerald-500/15",
                     isRejected && "border-rose-500 bg-rose-500 text-white ring-4 ring-rose-500/15",
@@ -109,7 +139,7 @@ export function ApprovalTimelineItem({ title, date, description, status, isLast 
             </span>
 
             {/* Konten */}
-            <div className="flex min-w-0 flex-col sm:mt-3 sm:items-center sm:px-2">
+            <div className={cn("flex min-w-0 flex-col", isHorizontal && "sm:mt-3 sm:items-center sm:px-2")}>
                 <Text
                     variant="xs"
                     weight="bold"

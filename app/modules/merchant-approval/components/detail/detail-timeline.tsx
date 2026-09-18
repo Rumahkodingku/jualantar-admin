@@ -1,31 +1,8 @@
-import {
-    CheckCircle2,
-    ClipboardCheck,
-    ListChecks,
-    PencilLine,
-    RefreshCw,
-    Send,
-    Undo2,
-    XCircle,
-    type LucideIcon,
-} from "lucide-react"
-
 import { Text } from "~/components/ui/text"
 import { formatDateTime } from "~/lib/format"
-import { cn } from "~/lib/utils"
 import { EVENT_TYPE_LABELS, eventActorLabel, REVIEW_COMPONENT_LABELS } from "../../services/merchant-approval.mappers"
-import type { ApprovalEvent, ApprovalEventType, ReviewComponent } from "../../types/merchant-approval.types"
-
-const EVENT_ICONS: Record<ApprovalEventType, LucideIcon> = {
-    application_submitted: Send,
-    approval_claimed: ClipboardCheck,
-    approval_released: Undo2,
-    component_reviewed: ListChecks,
-    revision_requested: PencilLine,
-    application_resubmitted: RefreshCw,
-    application_approved: CheckCircle2,
-    application_rejected: XCircle,
-}
+import type { ApprovalEvent, ReviewComponent } from "../../types/merchant-approval.types"
+import { ApprovalTimeline, type ApprovalStep } from "./approval-timeline"
 
 function metadataSummary(event: ApprovalEvent): string | null {
     const metadata = event.metadata
@@ -51,6 +28,19 @@ function metadataSummary(event: ApprovalEvent): string | null {
     return null
 }
 
+function eventToStep(event: ApprovalEvent, currentUserId: string | undefined): ApprovalStep {
+    const isRejected =
+        event.event_type === "application_rejected" ||
+        (event.event_type === "component_reviewed" && event.metadata?.status === "rejected")
+
+    return {
+        title: EVENT_TYPE_LABELS[event.event_type] ?? event.event_type,
+        date: `${eventActorLabel(event, currentUserId)} · ${formatDateTime(event.created_at)}`,
+        description: metadataSummary(event) ?? undefined,
+        status: isRejected ? "rejected" : "completed",
+    }
+}
+
 export function DetailTimeline({ events, currentUserId }: { events: ApprovalEvent[]; currentUserId?: string }) {
     if (events.length === 0) {
         return (
@@ -61,35 +51,10 @@ export function DetailTimeline({ events, currentUserId }: { events: ApprovalEven
     }
 
     return (
-        <ol className="flex flex-col">
-            {events.map((event, index) => {
-                const Icon = EVENT_ICONS[event.event_type] ?? ListChecks
-                const summary = metadataSummary(event)
-
-                return (
-                    <li key={event.id} className="flex gap-3">
-                        <div className="flex flex-col items-center">
-                            <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-muted text-muted-foreground">
-                                <Icon aria-hidden="true" className="size-3.5" />
-                            </span>
-                            {index < events.length - 1 && <span className="my-1 w-px flex-1 bg-border" />}
-                        </div>
-                        <div className={cn("min-w-0", index < events.length - 1 && "pb-4")}>
-                            <Text variant="sm" weight="medium" className="text-foreground">
-                                {EVENT_TYPE_LABELS[event.event_type] ?? event.event_type}
-                            </Text>
-                            <Text variant="xs" className="text-muted-foreground">
-                                {eventActorLabel(event, currentUserId)} · {formatDateTime(event.created_at)}
-                            </Text>
-                            {summary && (
-                                <Text variant="xs" className="mt-1 text-muted-foreground italic">
-                                    “{summary}”
-                                </Text>
-                            )}
-                        </div>
-                    </li>
-                )
-            })}
-        </ol>
+        <ApprovalTimeline
+            steps={events.map((event) => eventToStep(event, currentUserId))}
+            label="Riwayat aktivitas pengajuan"
+            orientation="vertical"
+        />
     )
 }
