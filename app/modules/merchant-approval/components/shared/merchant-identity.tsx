@@ -1,6 +1,5 @@
 import { useState } from "react"
 import { StoreIcon } from "lucide-react"
-
 import { Text } from "~/components/ui/text"
 import { cn } from "~/lib/utils"
 import type { MerchantSummary } from "../../types/merchant-approval.types"

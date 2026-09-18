@@ -3,7 +3,15 @@ import { Text } from "~/components/ui/text"
 import type { ApprovalListItem } from "../../types/merchant-approval.types"
 import { QueueTableRow } from "./queue-table-row"
 
-const COLUMNS = ["Merchant", "Pengajuan", "Tipe", "Layanan", "Status", "Tanggal Pengajuan", "Reviewer"] as const
+const COLUMNS = [
+    "Merchant",
+    "No. Pengajuan",
+    "Tipe Usaha",
+    "Layanan",
+    "Status",
+    "Tanggal Pengajuan",
+    "Reviewer",
+] as const
 
 interface QueueTableProps {
     data: ApprovalListItem[]
